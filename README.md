@@ -1,28 +1,21 @@
 
-# lz
+# md-macros
 
-## Quickstart
+![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
-Add `127.0.0.1      lukezilioli.solo` to `/etc/hosts`
+# Overview
 
-```
-npm install -g grunt
-git clone git@bitbucket.org:lzilioli/lz.git && cd $_
-npm install
-grunt hooks --no-prompt # install git hooks for the repo
-grunt dev
-node dist/index.js
-```
+There have been lots of requests and proposals over the years for an official spec
+for a slightly more rich and extensible version of markdown.
 
-## Grunt tasks
+* https://stackoverflow.com/questions/24580042/github-markdown-are-macros-and-variables-possible
+* https://github.com/howardroark/Markdown-Macros
 
-	grunt audit       # audit the code
-    npm run dev       # build and watch for changes
-    npm run dev-serve #
-	npm run start     # serve the app
+To John Gruber's (the creator of Markdown) credit, he designed Markdown to be lightweight
+and he has largely stuck to his original spec, so it is unlikely we will ever see an
+overhaul to the markdown specification that would bring features like macros or
+more rich rendering capabilities to the markdown language itself.
 
-# TODO
-
-- fix tag hover
-- write!
-- move archive to own page instead of dropdown
+Luckily, markdown is just text at some stage of a rendering pipeline. Thus, it is easy to
+pre or post process any markdown text without interfering with the resulting markdown in
+unintended ways.
