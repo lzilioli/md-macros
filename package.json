@@ -19,7 +19,7 @@
     "lint": "gulp lint",
     "lint-fix": "gulp lint --fix",
     "test": "node_modules/.bin/mocha dist/tests/test-runner.js",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
