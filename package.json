@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://bitbucket.org/lzilioli/md-macros/issues?status=new&status=open"
   },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com/"
+  },
   "scripts": {
     "build": "gulp build",
     "dev": "NODE_ENV=development gulp dev",
