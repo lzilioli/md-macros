@@ -1,0 +1,8 @@
+which gulp > /dev/null
+if [ $? -eq 0 ]
+then
+	gulp lint
+else
+	echo "You need gulp installed. npm install -g gulp-cli && npm install"
+	exit 1
+fi

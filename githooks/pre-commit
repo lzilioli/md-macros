@@ -1,0 +1,21 @@
+#!/bin/bash
+
+failIfChanges(){
+	if [ -n "$(git status --untracked-files=no --porcelain)" ]; then
+		# Uncommitted changes
+		echo $1
+		exit 1
+	fi
+}
+
+which gulp > /dev/null
+if [ $? -eq 0 ]
+then
+	# failIfChanges 'Please do not commit code with uncommitted changes. Commit or stash and try again.'
+	# Working directory clean
+	gulp todo
+	git add TODO.md
+else
+	echo "You need gulp installed. npm install -g gulp-cli && npm install"
+	exit 1
+fi
