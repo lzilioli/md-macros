@@ -1,13 +1,16 @@
-import * as util from 'util';
-import Express from 'express';
-import { serve } from 'lib/serve';
-import { LZComConfig, loadAppSettings } from 'lib/settings';
-import { getHostWithPort } from 'lib/util';
+import {replaceMacrosInMd} from 'lib/replace-macros-in-md';
+import { parseMacrosFromMd } from "lib/parse-macros-from-md";
+import { youtube } from 'lib/macros';
+import { MacroMethod } from 'lib/typedefs';
 
-console.log(process.env.NODE_ENV);
+const macros: {[key: string]: MacroMethod} = {youtube};
+const md: string = `
+test string [[youtube url="//www.youtube.com/embed/mnHrOBFlbdU"]]
+test string [[youtube
+	url="//www.youtube.com/embed/mnHrOBFlbdU"
+	arg1="val1"
+]]
+`;
 
-const config: LZComConfig = loadAppSettings();
-const app: Express.Application = serve( config );
-app.listen( config.port, (): void => {
-	console.log( util.format( `serving: ${config.protocol}://%s`, getHostWithPort( config ) ) );
-} );
+console.log(parseMacrosFromMd(md));
+console.log(replaceMacrosInMd(md, macros));

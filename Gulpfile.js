@@ -10,19 +10,19 @@ gulp.task('clean', () => {
         .pipe(clean());
 });
 
-gulp.task('webpack-server', () => {
+gulp.task('webpack', () => {
   return gulp.src('index.ts')
   .pipe(webpack( require('./webpack/webpack.server.js') ))
   .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('webpack-client', () => {
-  return gulp.src('client/index.ts')
-  .pipe(webpack( require('./webpack/webpack.client.js') ))
-  .pipe(gulp.dest('./dist/public/build'));
+gulp.task('webpack-tests', () => {
+  return gulp.src('test-runner.ts')
+  .pipe(webpack( require('./webpack/webpack.tests.js') ))
+  .pipe(gulp.dest('./dist/tests'));
 });
 
-gulp.task('webpack-server-watch', () => {
+gulp.task('webpack-watch', () => {
   const webpackConfig = require('./webpack/webpack.server.js');
   webpackConfig.watch = true;
   return gulp.src('index.ts')
@@ -30,38 +30,18 @@ gulp.task('webpack-server-watch', () => {
   .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('webpack-client-watch', () => {
-  const webpackConfig = require('./webpack/webpack.client.js');
-  webpackConfig.watch = true;
-  return gulp.src('client/index.ts')
-  .pipe(webpack( webpackConfig ))
-  .pipe(gulp.dest('./dist/public/build'));
-});
-
-gulp.task('copy', gulp.parallel([
-	()=>{
-		return gulp.src('./public/**/*', {base: './public/'})
-		.pipe(gulp.dest('./dist/public/'))
-	},
-	()=>{
-		return gulp.src('./views/**/*', {base: './views/'})
-		.pipe(gulp.dest('./dist/views'))
-	}
-]));
-
-gulp.task('copy-watch', () => {
-	return gulp.watch([
-		'public/**/*',
-		'views/**/*'
-	], gulp.parallel('copy'));
-});
+gulp.task('webpack-tests-watch', () => {
+	const webpackConfig = require('./webpack/webpack.tests.js');
+	webpackConfig.watch = true;
+	return gulp.src('test-runner.ts')
+	.pipe(webpack( webpackConfig ))
+	.pipe(gulp.dest('./dist/tests'));
+  });
 
 const buildTask = gulp.series(
 	'clean',
 	gulp.parallel(
-		'webpack-server',
-		'webpack-client',
-		'copy'
+		'webpack',
 	)
 );
 
@@ -69,10 +49,8 @@ gulp.task('build', buildTask);
 exports.default = buildTask;
 
 const watchTask = gulp.parallel([
-	'copy',
-	'copy-watch',
-	'webpack-client-watch',
-	'webpack-server-watch',
+	'webpack-watch',
+	'webpack-tests-watch',
 ]);
 gulp.task('watch', watchTask);
 gulp.task('dev', watchTask);
@@ -97,11 +75,6 @@ gulp.task('lint', () => {
 		// To have the process exit with an error code (1) on
 		// lint error, return the stream and pipe to failAfterError last.
 		.pipe(eslint.failAfterError());
-});
-
-gulp.task('update-posts', () => {
-	return gulp.src('../lukezilioli-blog-posts/**/*', {base: '../lukezilioli-blog-posts/'})
-		.pipe(gulp.dest('./public/blog-posts/'))
 });
 
 gulp.task('todo', () => {

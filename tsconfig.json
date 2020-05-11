@@ -24,8 +24,8 @@
     ],
     "include": [
         "./lib/**/*",
-    	"./client/**/*",
-    	"index.ts",
+        "index.ts",
+        "test-runner.ts",
     ],
     "exclude": [
     	"node_modules"
