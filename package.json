@@ -1,5 +1,5 @@
 {
-  "name": "md-macros",
+  "name": "@lzilioli/md-macros",
   "version": "0.0.0",
   "author": "Luke Zilioli (elzee08@gmail.com)",
   "main": "dist/index.js",
