@@ -42,6 +42,7 @@ const buildTask = gulp.series(
 	'clean',
 	gulp.parallel(
 		'webpack',
+		'webpack-tests',
 	)
 );
 
