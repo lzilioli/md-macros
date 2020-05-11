@@ -12,14 +12,21 @@ export function parseMacrosFromMd(md: string): Macro[] {
 		if (firstSpaceIndex === -1) {
 			firstSpaceIndex = macroText.indexOf('\n');
 		}
-		const name: string = macroText.substr(0, firstSpaceIndex).trim();
-		const argsString: string = macroText
-			.substr(firstSpaceIndex + 1, macroText.length)
-			.trim()
-			.replace(/\n/g, ' ')
-			.replace(/\t/g, ' ')
-			.replace(/ {2}/g, ' ')
-			.trim();
+		let name: string;
+		let argsString: string
+		if (firstSpaceIndex === -1) {
+			name = macroText;
+			argsString = '';
+		} else {
+			name = macroText.substr(0, firstSpaceIndex).trim();
+			argsString = macroText
+				.substr(firstSpaceIndex + 1, macroText.length)
+				.trim()
+				.replace(/\n/g, ' ')
+				.replace(/\t/g, ' ')
+				.replace(/ {2}/g, ' ')
+				.trim();
+		}
 		const $: cheerio = cheerio.load(`<div ${argsString}></div>`);
 		const args: unknown = {
 			...$('div').attr()

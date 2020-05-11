@@ -18,11 +18,10 @@ async function runTests(): Promise<void> {
         const test: TestingModule = modules[i];
         if (_.isFunction(test.test)) {
             await test.test();
-            return;
+        } else {
+            throw new Error('no compatible export found');
         }
-        throw new Error('no compatible export found');
     }
 }
 
 runTests();
-

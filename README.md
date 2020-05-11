@@ -116,7 +116,8 @@ console.log(rendered)
 #### Usage
 
 ```typescript
-import {parseMacrosFromMd, Macro} from 'md-macros';
+import {parseMacrosFromMd} from 'md-macros';
+import {Macro} from 'md-macros/lib/typedefs';
 
 const md: string = `
     Hello [[youtube url="<youtube embed url>"]]
@@ -154,7 +155,8 @@ You define what goes in the args object that is passed to the macro method. An e
 help illustrate:
 
 ```typescript
-import {replaceMacrosInMd, MacroMethod} from 'md-macros';
+import {replaceMacrosInMd} from 'md-macros';
+import {MacroMethod} from 'md-macros/lib/typedefs';
 
 const md: string = `
 [[greeting greeting="Hello" name="User"]]
