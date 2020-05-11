@@ -89,3 +89,10 @@ gulp.task('todo', () => {
 	.pipe(gulp.dest('./'));
 	// -> Will output a TODO.md with your todos
 });
+
+gulp.task('install-githooks', gulp.parallel([
+	()=>{
+		return gulp.src('./githooks/**/*', {base: './githooks/'})
+		.pipe(gulp.dest('./.git/hooks'))
+	}
+]));
