@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/lzilioli/md-macros.git"
+    "url": "git+ssh://git@github.com/lzilioli/md-macros.git"
   },
   "bugs": {
-    "url": "https://bitbucket.org/lzilioli/md-macros/issues?status=new&status=open"
+    "url": "https://github.com/lzilioli/md-macros/issues?status=new&status=open"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/lzilioli"
