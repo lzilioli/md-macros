@@ -12,13 +12,11 @@
     "url": "https://bitbucket.org/lzilioli/md-macros/issues?status=new&status=open"
   },
   "scripts": {
-    "start": "node dist/index.js",
     "build": "gulp build",
     "dev": "NODE_ENV=development gulp dev",
     "lint": "gulp lint",
-    "test": "node_modules/.bin/mocha dist/tests/test-runner.js",
     "lint-fix": "gulp lint --fix",
-    "dev-run": "NODE_ENV=development nodemon -w ./package.json -w ./dist/ -e \"md js css json\" dist/index.js"
+    "test": "node_modules/.bin/mocha dist/tests/test-runner.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",

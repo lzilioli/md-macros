@@ -1,16 +1,10 @@
-import {replaceMacrosInMd} from 'lib/replace-macros-in-md';
-import { parseMacrosFromMd } from "lib/parse-macros-from-md";
-import { youtube } from 'lib/macros';
-import { MacroMethod } from 'lib/typedefs';
+import { replaceMacrosInMd as replace } from 'lib/replace-macros-in-md';
+import { parseMacrosFromMd as parse } from "lib/parse-macros-from-md";
+import * as bundledMacros from 'lib/macros';
+import { MacroMethod as mm, Macro as m } from 'lib/typedefs';
 
-const macros: {[key: string]: MacroMethod} = {youtube};
-const md: string = `
-test string [[youtube url="//www.youtube.com/embed/mnHrOBFlbdU"]]
-test string [[youtube
-	url="//www.youtube.com/embed/mnHrOBFlbdU"
-	arg1="val1"
-]]
-`;
-
-console.log(parseMacrosFromMd(md));
-console.log(replaceMacrosInMd(md, macros));
+export type MacroMethod = mm;
+export type Macro = m;
+export const replaceMacrosInMd: (md: string, macros: {[key: string]: mm}) => string = replace;
+export const parseMacrosFromMd: (md: string) => m[] = parse;
+export const macros: {[key: string]: mm} = bundledMacros;
