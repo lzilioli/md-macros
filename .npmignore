@@ -11,4 +11,11 @@ lib/
 client/
 bitbucket-pipelines.yml
 webpack/
-index.js
+index.ts
+githooks/
+TODO.md
+test-runner.ts
+tsconfig.json
+my-eslint-rules.json
+.eslintrc
+.github
