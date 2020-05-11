@@ -12,7 +12,9 @@ module.exports = merge([
 		},
 		output: {
 			path: path.resolve('dist'),
-			filename: '[name].js'
+			filename: '[name].js',
+			library: 'mdMacros',
+			libraryTarget: 'commonjs2'
 		},
 		resolve: {
 			alias: {

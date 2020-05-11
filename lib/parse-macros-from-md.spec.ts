@@ -11,7 +11,6 @@ test string [[youtube
 `;
 
 export async function test(): Promise<void> {
-	console.log(describe, it)
 	describe( 'parseMacrosFromMd', () => {
         it('does a thing', () => {
             console.log(parseMacrosFromMd(md));
