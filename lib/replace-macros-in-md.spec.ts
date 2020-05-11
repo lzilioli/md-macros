@@ -8,7 +8,7 @@ export async function test(): Promise<void> {
 		it('throws if macro is missing', () => {
 			assert.throws(()=>{
 				replaceMacrosInMd(`[[sampleMacro]]`, {});
-			});
+			}, new Error('md string contained macro sampleMacro, but no such macro was passed'));
 		});
 
 		it('throws if macro is not a function', () => {
@@ -16,7 +16,7 @@ export async function test(): Promise<void> {
 				replaceMacrosInMd(`[[sampleMacro]]`, {
 					sampleMacro: 'test' as unknown as MacroMethod
 				});
-			});
+			}, new Error('macro sampleMacro is not a function'));
 		});
 
 		it('works with no args', () => {

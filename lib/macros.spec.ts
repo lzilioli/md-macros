@@ -6,7 +6,7 @@ export async function test(): Promise<void> {
         it('throws if no url', () => {
             assert.throws((): void => {
 				macros.youtube({} as {url: string});
-			});
+			}, new Error('youtube macro requires url argument'));
         });
         it('replaces the url properly', () => {
 			const url: string = 'TESTING';
