@@ -20,7 +20,10 @@ function fetchWebpackTasks(watch) {
 		if (!_.isString(config.output.path)) {
 			throw new Error('config.output.path must be a string');
 		}
-		config.watch = watch;
+		config = {
+			...config,
+			watch
+		};
 		return () => {
 			return webpack(config).pipe(gulp.dest(config.output.path));
 		};
