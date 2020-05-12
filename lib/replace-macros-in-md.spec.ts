@@ -52,5 +52,36 @@ frameborder="0"
 allowfullscreen
 ></iframe>`);
         });
+
+		it('works with the example from the readme', () => {
+			const macros: {[key: string]: MacroMethod} = {
+				hello: (): string => {
+					return 'hello';
+				},
+				world: (): string => {
+					return 'world';
+				},
+				greeting: (args: {name: string; greeting: string}): string => {
+					// A more complex macro that takes arguments
+					// it is a good idea to validate the args here
+					if (!args.name) {
+						throw new Error('no name specified');
+					}
+					if (!args.greeting) {
+						throw new Error('no greeting specified');
+					}
+					return `${args.greeting}, ${args.name}:`;
+				}
+			};
+
+
+			const md: string = `[[greeting greeting="Hello" name="User"]]\n\t[[hello]] [[world]]`;
+
+			const rendered: string = replaceMacrosInMd(md, macros);
+			assert.equal(
+				rendered,
+				`Hello, User:\n\thello world`
+			);
+        });
 	} );
 }

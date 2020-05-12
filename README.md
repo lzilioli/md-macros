@@ -118,7 +118,7 @@ console.log(rendered)
 
 ```typescript
 import {parseMacrosFromMd} from 'md-macros';
-import {Macro} from 'md-macros/lib/typedefs';
+import {Macro} from 'md-macros/dist/typedefs';
 
 const md: string = `
     Hello [[youtube url="<youtube embed url>"]]
@@ -157,18 +157,13 @@ help illustrate:
 
 ```typescript
 import {replaceMacrosInMd} from 'md-macros';
-import {MacroMethod} from 'md-macros/lib/typedefs';
-
-const md: string = `
-[[greeting greeting="Hello" name="User"]]
-    [[hello]][[world]]
-`;
+import {MacroMethod} from 'md-macros/dist/typedefs';
 
 const macros: {[key: string]: MacroMethod} = {
-    hello: (_ags: {}): string => {
+    hello: (): string => {
         return 'hello';
     },
-    world: (_ags: {}): string => {
+    world: (): string => {
         return 'world';
     },
     greeting: (args: {name: string, greeting: string}): string => {
@@ -184,9 +179,15 @@ const macros: {[key: string]: MacroMethod} = {
     }
 }
 
-const rendered: string = replaceMacrosInMd(md, macros);
 
-console.log(rendered)
+const md: string = `[[greeting greeting="Hello" name="User"]]\n\t[[hello]] [[world]]`;
+
+const rendered: string = replaceMacrosInMd(md, macros);
+assert.equal(
+    rendered,
+    `Hello, User:\n\thello world`
+);
+console.log(rendered);
 /*
     Hello User:
         hello world

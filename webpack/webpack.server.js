@@ -8,7 +8,8 @@ module.exports = merge([
 		target: 'node',
 		externals: [nodeExternals()],
 		entry: {
-			index: path.resolve('index.ts')
+			index: path.resolve('index.ts'),
+			typedefs: path.resolve('lib/typedefs.ts'),
 		},
 		output: {
 			path: path.resolve('dist'),
