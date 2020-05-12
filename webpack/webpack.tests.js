@@ -11,7 +11,7 @@ module.exports = merge([
 			'test-runner': path.resolve('test-runner.ts')
 		},
 		output: {
-			path: path.resolve('dist'),
+			path: path.resolve('dist/tests'),
 			filename: '[name].js'
 		},
 		resolve: {

@@ -1,48 +1,39 @@
+const _ = require('lodash');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const clean = require('gulp-rimraf');
 const eslint = require('gulp-eslint');
 const todo = require('gulp-todo');
 const webpack = require('webpack-stream');
+const webpackConfig = require('./webpack/webpack.config.js');
 
 gulp.task('clean', () => {
 	return gulp.src('./dist', {allowEmpty: true})
         .pipe(clean());
 });
 
-gulp.task('webpack', () => {
-  return gulp.src('index.ts')
-  .pipe(webpack( require('./webpack/webpack.server.js') ))
-  .pipe(gulp.dest('./dist'));
-});
+function fetchWebpackTasks(watch) {
+	return _.map(webpackConfig, (config) => {
+		if (!config.output) {
+			throw new Error('config.output must be defined');
+		}
+		if (!_.isString(config.output.path)) {
+			throw new Error('config.output.path must be a string');
+		}
+		config.watch = watch;
+		return () => {
+			return webpack(config).pipe(gulp.dest(config.output.path));
+		};
+	});
+}
 
-gulp.task('webpack-tests', () => {
-  return gulp.src('test-runner.ts')
-  .pipe(webpack( require('./webpack/webpack.tests.js') ))
-  .pipe(gulp.dest('./dist/tests'));
-});
-
-gulp.task('webpack-watch', () => {
-  const webpackConfig = require('./webpack/webpack.server.js');
-  webpackConfig.watch = true;
-  return gulp.src('index.ts')
-  .pipe(webpack( webpackConfig ))
-  .pipe(gulp.dest('./dist'));
-});
-
-gulp.task('webpack-tests-watch', () => {
-	const webpackConfig = require('./webpack/webpack.tests.js');
-	webpackConfig.watch = true;
-	return gulp.src('test-runner.ts')
-	.pipe(webpack( webpackConfig ))
-	.pipe(gulp.dest('./dist/tests'));
-  });
+gulp.task('webpack', gulp.parallel(fetchWebpackTasks(false)));
+gulp.task('webpack-watch', gulp.parallel(fetchWebpackTasks(true)));
 
 const buildTask = gulp.series(
 	'clean',
 	gulp.parallel(
 		'webpack',
-		'webpack-tests',
 	)
 );
 
@@ -51,7 +42,6 @@ exports.default = buildTask;
 
 const watchTask = gulp.parallel([
 	'webpack-watch',
-	'webpack-tests-watch',
 ]);
 gulp.task('watch', watchTask);
 gulp.task('dev', watchTask);
