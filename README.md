@@ -40,7 +40,7 @@ what if we wanted to, for example, embed a youtube iframe within our resulting h
 Typically, we would insert the html straight into the markdown file as follows:
 
 ```md
-This is my super clean markdown document. Here's a video:
+This is my regular markdown document. If I wanted to include a youtube video embed, this is what I would do today:
 
 <iframe width="560" height="315" src="<youtube-embed-url>"
     frameborder="0" allowfullscreen></iframe>
@@ -59,7 +59,7 @@ md-macros modifiies the markdown rendering pipeline as follows:
 and enables the preceding markdown example to be cleaned up as follows:
 
 ```md
-This is my super clean markdown document. Here's a video:
+This is my super clean markdown document thanks to md-macros! This is all I need to type in order to include a video.
 [[youtube url="<youtube-embed-url>"]]
 ```
 
@@ -180,13 +180,11 @@ const macros: {[key: string]: MacroMethod} = {
 }
 
 
-const md: string = `[[greeting greeting="Hello" name="User"]]\n\t[[hello]] [[world]]`;
+const md: string = `[[greeting greeting="Hello" name="User"]]
+    [[hello]] [[world]]`;
 
 const rendered: string = replaceMacrosInMd(md, macros);
-assert.equal(
-    rendered,
-    `Hello, User:\n\thello world`
-);
+console.log(rendered === `Hello, User:\n\thello world`); // true
 console.log(rendered);
 /*
     Hello User:
