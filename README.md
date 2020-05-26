@@ -11,6 +11,8 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 -   [Overview](#overview)
 
+-   [Usage](#usage)
+
 -   [What is a md-macros](#what-is-a-md-macros)
 
 -   [API](#api)
@@ -21,11 +23,11 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
         -   [replaceMacrosInMd](#replacemacrosinmd)
 
-            -   [Usage](#usage)
+            -   [Usage](#usage-1)
 
         -   [parseMacrosFromMd](#parsemacrosfrommd)
 
-            -   [Usage](#usage-1)
+            -   [Usage](#usage-2)
 
     -   [macros](#macros)
 
@@ -53,6 +55,19 @@ Luckily, markdown is just text at some stage of a rendering pipeline. Thus, it i
 pre- or post- process any markdown text without interfering with other steps of the text
 processing pipeline.
 
+# Usage
+
+Simply, you can run the bundled macros against any markdown file with:
+
+```bash
+mdmacros README.tmpl.md README.md
+```
+
+Out of the box you can use this to easily insert a table of contents section into your readme,
+simply by including a call to the mdToc macro.
+
+For usage within node scripts, read on...
+
 # What is a md-macros
 
 Typically, the pipeline for rendering markdown text to html is very simple:
@@ -67,7 +82,7 @@ what if we wanted to, for example, embed a youtube iframe within our resulting h
 Typically, we would insert the html straight into the markdown file as follows:
 
 ```md
-This is my super clean markdown document. Here's a video:
+This is my regular markdown document. If I wanted to include a youtube video embed, this is what I would do today:
 
 <iframe width="560" height="315" src="<youtube-embed-url>"
     frameborder="0" allowfullscreen></iframe>
@@ -86,7 +101,7 @@ md-macros modifiies the markdown rendering pipeline as follows:
 and enables the preceding markdown example to be cleaned up as follows:
 
 ```md
-This is my super clean markdown document. Here's a video:
+This is my super clean markdown document thanks to md-macros! This is all I need to type in order to include a video.
 [[youtube url="<youtube-embed-url>"]]
 ```
 
@@ -212,13 +227,11 @@ const macros: {[key: string]: MacroMethod} = {
 }
 
 
-const md: string = `[[greeting greeting="Hello" name="User"]]\n\t[[hello]] [[world]]`;
+const md: string = `[[greeting greeting="Hello" name="User"]]
+    [[hello]] [[world]]`;
 
 const rendered: string = await replaceMacrosInMd(md, macros);
-assert.equal(
-    rendered,
-    `Hello, User:\n\thello world`
-);
+console.log(rendered === `Hello, User:\n\thello world`); // true
 console.log(rendered);
 /*
     Hello User:

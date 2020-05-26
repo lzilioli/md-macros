@@ -5,7 +5,7 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 ![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
-[[mdToc ]]
+[[mdToc]]
 
 # Overview
 
@@ -26,6 +26,19 @@ more rich rendering capabilities to the markdown language itself.
 Luckily, markdown is just text at some stage of a rendering pipeline. Thus, it is easy to
 pre- or post- process any markdown text without interfering with other steps of the text
 processing pipeline.
+
+# Usage
+
+Simply, you can run the bundled macros against any markdown file with:
+
+```bash
+mdmacros README.tmpl.md README.md
+```
+
+Out of the box you can use this to easily insert a table of contents section into your readme,
+simply by including a call to the mdToc macro.
+
+For usage within node scripts, read on...
 
 # What is a md-macros
 
