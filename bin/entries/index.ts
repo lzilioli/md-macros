@@ -18,7 +18,7 @@ readFileAsync(process.argv[2])
         mdToc: macros.mdToc,
     }, ['!mdToc']);
 })
-.then((contents: Buffer) => {
+.then((contents: string) => {
     return replaceMacrosInMd(contents.toString(), {
         inlineFile: macros.inlineFile,
     }, ['!inlineFile']);
