@@ -5,6 +5,7 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 ![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
+[[mdToc ]]
 
 # Overview
 
@@ -141,13 +142,18 @@ console.log(macros)
 This package is intended to aid in the markdown processing pipeline by introducing
 the *concept* of macros. To that end, it doesn't provide many macros for consumption.
 
-The only macro currently exported by this repo is the `youtube` macro, which has been
-used in the above examples.
+### youtube
+
+This macros is heavily utilized in the above examples.
+
+### mdToc
+
+This macro takes no arguments, and replaces the macro call with the table of contents for the file.
+
+### Creating a macro
 
 If you'd like to write your own macro method, you can, just be sure to specify all macros
 thay you call in your text in the `macros` argument to `replaceMacrosInMd` when you call it.
-
-### Creating a macro
 
 Macros are simple functions that take a single `args` object and return a string. They will
 be invoked against the text you pass to `replaceMacrosInMd`, using the args specified there.
@@ -160,11 +166,11 @@ import {replaceMacrosInMd} from 'md-macros';
 import {MacroMethod} from 'md-macros/dist/typedefs';
 
 const macros: {[key: string]: MacroMethod} = {
-    hello: (): string => {
-        return 'hello';
+    hello: async  (): string => {
+        return Promise.resolve('hello');
     },
-    world: (): string => {
-        return 'world';
+    world: async (): string => {
+        return Promise.resolve('world');
     },
     greeting: (args: {name: string, greeting: string}): string => {
         // A more complex macro that takes arguments
@@ -183,7 +189,7 @@ const macros: {[key: string]: MacroMethod} = {
 const md: string = `[[greeting greeting="Hello" name="User"]]
     [[hello]] [[world]]`;
 
-const rendered: string = replaceMacrosInMd(md, macros);
+const rendered: string = await replaceMacrosInMd(md, macros);
 console.log(rendered === `Hello, User:\n\thello world`); // true
 console.log(rendered);
 /*

@@ -1,4 +1,4 @@
-export type MacroMethod = (args: unknown) => string;
+export type MacroMethod = (args: unknown, mdText: string) => Promise<string>;
 
 export interface Macro {
 	name: string;

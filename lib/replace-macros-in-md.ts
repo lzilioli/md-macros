@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Macro, MacroMethod } from 'lib/typedefs';
 import { parseMacrosFromMd } from 'lib/parse-macros-from-md';
 
-export function replaceMacrosInMd(md: string, macros: {[key: string]: (args: unknown) => string}): string {
+export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod}): Promise<string> {
 	// Parse all macros out of the markdown string
 	const parsedMacros: Macro[] = parseMacrosFromMd(md);
 
@@ -20,11 +20,12 @@ export function replaceMacrosInMd(md: string, macros: {[key: string]: (args: unk
 	// Execute each macro with its arguments, and replace its original
 	// reference in newString with its return value
 	let newString: string = md;
-	_.each(parsedMacros, (macro: Macro) => {
+	for(let i: number = 0; i < parsedMacros.length; i++) {
+		const macro: Macro = parsedMacros[i];
 		const method: MacroMethod = macros[macro.name];
-		const macroResults: string = method(macro.args);
+		const macroResults: string = await method(macro.args, md);
 		newString = newString.replace(macro.fullMatch, macroResults);
-	});
+	}
 
 	// Return the new string, with all macros having been executed
 	return newString;
