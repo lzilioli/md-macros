@@ -1,0 +1,35 @@
+#!/bin/bash
+
+BRANCH_NAME=$(git symbolic-ref --short HEAD)
+BRANCH_NAME="${BRANCH_NAME##*/}"
+
+BRANCH_MATCHES_PATTERN=0
+if [[ $BRANCH_NAME == LZ-* ]]
+then
+  BRANCH_MATCHES_PATTERN=1
+fi
+
+PREPEND_VAL=$(echo $BRANCH_NAME | grep -Eow 'LZ-[0-9]+')
+
+MSG_ALREADY_THERE=0
+
+if [[ -z "$PREPEND_VAL" ]]
+then
+	# This is the case where the branch doesn't match the pattern
+	MSG_ALREADY_THERE=1
+else
+	head -1 $1 | grep $PREPEND_VAL > /dev/null
+	if [[ $? -eq 0 ]]
+	then
+		MSG_ALREADY_THERE=1
+	fi
+fi
+
+if [ -n "$BRANCH_NAME" ] && [[ $BRANCH_MATCHES_PATTERN -eq 1 ]] && [[ $MSG_ALREADY_THERE -eq 0 ]]; then
+  sed -i.bak -e "1s/^/[$PREPEND_VAL] /" $1
+fi
+
+if [ -n "$BRANCH_NAME" ] && [[ $BRANCH_MATCHES_PATTERN -eq 0 ]] && [[ $MSG_ALREADY_THERE -eq 0 ]]; then
+  PREPEND_VAL='LZ-XX'
+  sed -i.bak -e "1s/^/[$PREPEND_VAL] /" $1
+fi
