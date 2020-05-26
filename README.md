@@ -30,7 +30,13 @@ Extensible macro processing framework for markdown, written in TypeScript.
     -   [macros](#macros)
 
         -   [youtube](#youtube)
+
         -   [mdToc](#mdtoc)
+
+        -   [inlineFile](#inlinefile)
+
+            -   [args](#args)
+
         -   [Creating a macro](#creating-a-macro)
 
 # Overview
@@ -110,7 +116,7 @@ This is much cleaner and easier to read.
 ## Typedefs
 
 ```typescript
-export type MacroMethod = (args: unknown) => string;
+export type MacroMethod = (args: unknown, mdText: string) => Promise<string>;
 
 export interface Macro {
 	name: string;
@@ -188,6 +194,15 @@ This macros is heavily utilized in the above examples.
 ### mdToc
 
 This macro takes no arguments, and replaces the macro call with the table of contents for the file.
+
+### inlineFile
+
+Inlines the contents of a file into the markdown document.
+Used within this readme for the Typedefs section.
+
+#### args
+
+`path`: path to the file to inline
 
 ### Creating a macro
 

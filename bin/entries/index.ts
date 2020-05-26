@@ -18,6 +18,11 @@ readFileAsync(process.argv[2])
         mdToc: macros.mdToc,
     }, ['!mdToc']);
 })
+.then((contents: Buffer) => {
+    return replaceMacrosInMd(contents.toString(), {
+        inlineFile: macros.inlineFile,
+    }, ['!inlineFile']);
+})
 .then((final: string) => {
     console.log('mdmacros: writing to', process.argv[3]);
     return writeFileAsync(process.argv[3], final);

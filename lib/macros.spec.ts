@@ -1,6 +1,7 @@
 import assert from 'assert';
 import * as macros from '@lib/macros';
 import { replaceMacrosInMd } from './replace-macros-in-md';
+import * as mock from 'mock-fs';
 
 export async function test(): Promise<void> {
 	describe( 'youtube macro', () => {
@@ -21,6 +22,60 @@ src="${url}"
 frameborder="0"
 allowfullscreen
 ></iframe>`
+			);
+        });
+	} );
+
+	describe( 'inlineFile macro', () => {
+		afterEach(()=>{
+			mock.restore();
+		})
+		it('throws if no path', () => {
+            assert.rejects((): Promise<string> => {
+				return macros.inlineFile({} as {path: string}, '');
+			}, new Error('inlineFile macro requires path argument'));
+        });
+        it('returns the contests of the file', async () => {
+			const inlineText: string = 'TEST INLINE';
+			mock({
+				'test': {
+					'test.md': inlineText
+				}
+			})
+			const path: string = 'test/test.md';
+			const result: string = await macros.inlineFile({path}, '');
+			assert.equal(
+				result,
+				inlineText
+			);
+        });
+        it('works in a greater context', async () => {
+			const inlineText: string = `
+
+
+
+			TEST INLINE
+
+
+
+
+`;
+			mock({
+				'test': {
+					'test.md': inlineText
+				}
+			})
+			const path: string = 'test/test.md';
+			const fileInline: string = `[[inlineFile path="${path}"]]`;
+			const mdBeforeInline: string = 'What it to babeyyyyyy ';
+			const mdAfterInline: string = 'Its pickle rickk!';
+			const mdText: string = `${mdBeforeInline}${fileInline}${mdAfterInline}`;
+			const result: string = await replaceMacrosInMd(mdText, {
+				inlineFile: macros.inlineFile
+			});
+			assert.equal(
+				result,
+				`${mdBeforeInline}${inlineText.trim()}${mdAfterInline}`
 			);
         });
 	} );

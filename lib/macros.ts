@@ -2,6 +2,10 @@ import * as remark from 'remark';
 import * as toc from 'remark-toc';
 import { MacroMethod } from './entries/typedefs';
 import { replaceMacrosInMd } from './replace-macros-in-md';
+import * as fs from 'fs';
+import * as util from 'util';
+
+const readFileAsync: (path: string) => Promise<Buffer> = util.promisify(fs.readFile);
 
 /**
  * Requires `url` argument. Returns a rendered iframe with args.url
@@ -44,4 +48,11 @@ export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> =
             });
         });
     });
+}
+
+export const inlineFile: MacroMethod = async(args: {path: string}): Promise<string> => {
+    if (!args.path) {
+        throw new Error(`inlineFile macro requires path argument`)
+    }
+    return await (await readFileAsync(args.path)).toString().trim();
 }
