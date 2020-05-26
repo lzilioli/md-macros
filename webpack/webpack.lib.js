@@ -1,25 +1,23 @@
 const merge = require('webpack-merge');
 const path = require( 'path' );
 const nodeExternals = require('webpack-node-externals');
+const getWebpackEntryMap = require('./util/getWebpackEntryMap');
+const appPaths = require('../app-paths')
 
 module.exports = merge([
-	require('./webpack.base.js'),
+	require('./util/webpack.base.js'),
 	{
 		target: 'node',
 		externals: [nodeExternals()],
-		entry: {
-			index: path.resolve('index.ts'),
-			typedefs: path.resolve('lib/typedefs.ts'),
-		},
+		entry: getWebpackEntryMap(appPaths.libFolder),
 		output: {
-			path: path.resolve('dist'),
+			path: path.resolve(path.join(appPaths.distFolder, appPaths.libFolder)),
 			filename: '[name].js',
 			library: 'mdMacros',
 			libraryTarget: 'commonjs2'
 		},
 		resolve: {
 			alias: {
-				lib: path.resolve( 'lib/' )
 			}
 		},
 		module: {

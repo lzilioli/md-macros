@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as macros from 'lib/macros';
+import * as macros from '@lib/macros';
 import { replaceMacrosInMd } from './replace-macros-in-md';
 
 export async function test(): Promise<void> {

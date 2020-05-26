@@ -18,7 +18,7 @@
     "dev": "NODE_ENV=development gulp dev",
     "lint": "gulp lint",
     "lint-fix": "gulp lint --fix",
-    "test": "node_modules/.bin/mocha dist/tests/test-runner.js",
+    "test": "node_modules/.bin/mocha build/tests/index.js",
     "prepare": "npm run build"
   },
   "dependencies": {

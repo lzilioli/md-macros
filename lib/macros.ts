@@ -1,6 +1,6 @@
 import * as remark from 'remark';
 import * as toc from 'remark-toc';
-import { MacroMethod } from './typedefs';
+import { MacroMethod } from './entries/typedefs';
 import { replaceMacrosInMd } from './replace-macros-in-md';
 
 /**

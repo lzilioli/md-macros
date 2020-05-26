@@ -13,9 +13,7 @@
         "moduleResolution": "node",
         "baseUrl": "./",
         "paths": {
-            "lib/*": ["lib/*"],
-            "client/*": ["client/*"],
-            "views/*": ["views/*"]
+            "@lib/*": ["lib/*"]
         }
     },
     "types": [
@@ -24,8 +22,7 @@
     ],
     "include": [
         "./lib/**/*",
-        "index.ts",
-        "test-runner.ts",
+        "./tests/**/*",
     ],
     "exclude": [
     	"node_modules"

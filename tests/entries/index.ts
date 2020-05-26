@@ -10,7 +10,7 @@ interface TestingModule {
     test: TestingFunction;
 }
 
-const testsContext: __WebpackModuleApi.RequireContext = require.context( `lib/`, true, /^.*\.spec\.ts$/ );
+const testsContext: __WebpackModuleApi.RequireContext = require.context( `../../`, true, /^.*\.spec\.ts$/ );
 const modules: TestingModule[] = requireAll( testsContext );
 
 async function runTests(): Promise<void> {

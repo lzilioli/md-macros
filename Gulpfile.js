@@ -5,10 +5,10 @@ const clean = require('gulp-rimraf');
 const eslint = require('gulp-eslint');
 const todo = require('gulp-todo');
 const webpack = require('webpack-stream');
-const webpackConfig = require('./webpack/webpack.config.js');
+const webpackConfig = require('./webpack.config.js');
 
 gulp.task('clean', () => {
-	return gulp.src('./dist', {allowEmpty: true})
+	return gulp.src(['./dist', './build'], {allowEmpty: true})
         .pipe(clean());
 });
 

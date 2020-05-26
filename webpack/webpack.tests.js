@@ -1,23 +1,21 @@
 const merge = require('webpack-merge');
 const path = require( 'path' );
 const nodeExternals = require('webpack-node-externals');
+const getWebpackEntryMap = require('./util/getWebpackEntryMap');
+const appPaths = require('../app-paths')
 
 module.exports = merge([
-	require('./webpack.base.js'),
+	require('./util/webpack.base.js'),
 	{
 		target: 'node',
 		externals: [nodeExternals()],
-		entry: {
-			'test-runner': path.resolve('test-runner.ts')
-		},
+		entry: getWebpackEntryMap(appPaths.testsFolder),
 		output: {
-			path: path.resolve('dist/tests'),
+			path: path.resolve(path.join(appPaths.buildFolder, appPaths.testsFolder)),
 			filename: '[name].js'
 		},
 		resolve: {
 			alias: {
-				lib: path.resolve( 'lib/' ),
-				tests: path.resolve( 'tests/' )
 			}
 		},
 		module: {

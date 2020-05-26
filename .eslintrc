@@ -12,6 +12,8 @@
   ],
   "ignorePatterns": [
     "webpack/**",
-    "Gulpfile.js"
+    "Gulpfile.js",
+    "build/**",
+    "dist/**"
   ]
 }

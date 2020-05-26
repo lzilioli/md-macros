@@ -1,6 +1,6 @@
-import { replaceMacrosInMd } from "lib/replace-macros-in-md";
-import * as macros from 'lib/macros';
-import { MacroMethod } from "lib/typedefs";
+import { replaceMacrosInMd } from "@lib/replace-macros-in-md";
+import * as macros from '@lib/macros';
+import { MacroMethod } from "@lib/entries/typedefs";
 import assert from "assert";
 
 export async function test(): Promise<void> {

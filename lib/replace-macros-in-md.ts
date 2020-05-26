@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
-import { Macro, MacroMethod } from 'lib/typedefs';
-import { parseMacrosFromMd } from 'lib/parse-macros-from-md';
+import { Macro, MacroMethod } from '@lib/entries/typedefs';
+import { parseMacrosFromMd } from '@lib/parse-macros-from-md';
 
 export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod}): Promise<string> {
 	// Parse all macros out of the markdown string
