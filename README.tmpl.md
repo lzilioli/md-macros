@@ -178,38 +178,5 @@ You define what goes in the args object that is passed to the macro method. An e
 help illustrate:
 
 ```typescript
-import {replaceMacrosInMd} from 'md-macros';
-import {MacroMethod} from 'md-macros/dist/typedefs';
-
-const macros: {[key: string]: MacroMethod} = {
-    hello: async  (): string => {
-        return Promise.resolve('hello');
-    },
-    world: async (): string => {
-        return Promise.resolve('world');
-    },
-    greeting: (args: {name: string, greeting: string}): string => {
-        // A more complex macro that takes arguments
-        // it is a good idea to validate the args here
-        if (!args.name) {
-            throw new Error('no name specified');
-        }
-        if (!args.greeting) {
-            throw new Error('no greeting specified');
-        }
-        return `${args.greeting}, ${args.name}:`;
-    }
-}
-
-
-const md: string = `[[greeting greeting="Hello" name="User"]]
-    [[hello]] [[world]]`;
-
-const rendered: string = await replaceMacrosInMd(md, macros);
-console.log(rendered === `Hello, User:\n\thello world`); // true
-console.log(rendered);
-/*
-    Hello User:
-        hello world
-*/
+[[inlineFile path="examples/creating-macros.ts"]]
 ```

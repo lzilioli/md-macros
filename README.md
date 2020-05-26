@@ -220,10 +220,10 @@ import {replaceMacrosInMd} from 'md-macros';
 import {MacroMethod} from 'md-macros/dist/typedefs';
 
 const macros: {[key: string]: MacroMethod} = {
-    hello: async  (): string => {
+    hello: async  (): Promise<string> => {
         return Promise.resolve('hello');
     },
-    world: async (): string => {
+    world: async (): Promise<string> => {
         return Promise.resolve('world');
     },
     greeting: (args: {name: string, greeting: string}): string => {
@@ -235,7 +235,7 @@ const macros: {[key: string]: MacroMethod} = {
         if (!args.greeting) {
             throw new Error('no greeting specified');
         }
-        return `${args.greeting}, ${args.name}:`;
+        return Promise.resolve(`${args.greeting}, ${args.name}:`);
     }
 }
 
@@ -243,11 +243,13 @@ const macros: {[key: string]: MacroMethod} = {
 const md: string = `[[greeting greeting="Hello" name="User"]]
     [[hello]] [[world]]`;
 
-const rendered: string = await replaceMacrosInMd(md, macros);
-console.log(rendered === `Hello, User:\n\thello world`); // true
-console.log(rendered);
-/*
-    Hello User:
-        hello world
-*/
+replaceMacrosInMd(md, macros)
+.then((rendered: string) => {
+    console.log(rendered === `Hello, User:\n\thello world`); // true
+    console.log(rendered);
+    /*
+        Hello User:
+            hello world
+    */
+});
 ```
