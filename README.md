@@ -7,8 +7,6 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 # Table Of Contents
 
--   [Table Of Contents End](#table-of-contents-end)
-
 -   [Overview](#overview)
 
 -   [Usage](#usage)

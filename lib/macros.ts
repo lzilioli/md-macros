@@ -40,7 +40,7 @@ export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> =
                 if (!match) {
                     throw new Error('TOC could not be found');
                 }
-                yep(match[1].trim());
+                yep(match[1].replace(`-   [Table Of Contents End](#table-of-contents-end)\n\n`, '').trim());
             });
         });
     });

@@ -60,8 +60,6 @@ jk
 finally...`);
 			const expected: string = `# Table Of Contents
 
--   [Table Of Contents End](#table-of-contents-end)
-
 -   [Some Other Section](#some-other-section)
 
 -   [This is the first section](#this-is-the-first-section)
@@ -116,8 +114,6 @@ finally...`, {mdToc: macros.mdToc}, ['macro']);
 This is a short document, but it needs a
 
 # Table Of Contents
-
--   [Table Of Contents End](#table-of-contents-end)
 
 -   [Some Other Section](#some-other-section)
 
