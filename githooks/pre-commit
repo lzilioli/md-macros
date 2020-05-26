@@ -15,7 +15,7 @@ then
 	# Working directory clean
 	gulp todo
 	git add TODO.md
-	node dist/bin/index.js README.tmpl.md README.md &&
+	npm run update-readme &&
 	git add README.md
 else
 	echo "You need gulp installed. npm install -g gulp-cli && npm install"
