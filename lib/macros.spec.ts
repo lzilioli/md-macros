@@ -35,6 +35,8 @@ This is a short document, but it needs a
 
 # Some Other Section
 
+This section contains uses another [[macro]], which remains untouched.
+
 It doesnt do a whole lot, but its got a couple of sections.
 
 # This is the first section
@@ -86,6 +88,8 @@ This is a short document, but it needs a
 
 # Some Other Section
 
+This section contains uses another [[macro]], which remains untouched.
+
 It doesnt do a whole lot, but its got a couple of sections.
 
 # This is the first section
@@ -106,7 +110,7 @@ jk
 
 ### Ok, it works!
 
-finally...`, {mdToc: macros.mdToc});
+finally...`, {mdToc: macros.mdToc}, ['macro']);
 			const expected: string = `Hello this is a markdown file.
 
 This is a short document, but it needs a
@@ -128,6 +132,8 @@ This is a short document, but it needs a
         -   [Ok, it works!](#ok-it-works)
 
 # Some Other Section
+
+This section contains uses another [[macro]], which remains untouched.
 
 It doesnt do a whole lot, but its got a couple of sections.
 

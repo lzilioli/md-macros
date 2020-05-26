@@ -4,6 +4,7 @@ module.exports = {
     // | build/
     libFolder: 'lib',
     serverFolder: 'server',
+    binaryFolder: 'bin',
     publicFolder: 'public',
     clientFolder: 'client',
     sassFolder: 'client/sass',

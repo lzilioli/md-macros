@@ -25,7 +25,7 @@ export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> =
     return new Promise((yep: (result: string) => void, nope: (e: Error) => void) => {
         replaceMacrosInMd(mdText, {
             mdToc: () => Promise.resolve('# Table Of Contents\n\n# Table Of Contents End')
-        })
+        }, ['!mdToc'])
         .then((modifiedMdText: string) => {
             remark()
             .use(toc)
@@ -37,6 +37,9 @@ export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> =
                 const contents: string = (file as {contents: string}).contents;
                 const TOC_REGEX: RegExp = /(# Table Of Contents(?:[\s\S](?!# Table Of Contents End))*)\n# Table Of Contents End/;
                 const match: RegExpMatchArray = contents.match(TOC_REGEX);
+                if (!match) {
+                    throw new Error('TOC could not be found');
+                }
                 yep(match[1].trim());
             });
         });
