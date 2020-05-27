@@ -1,0 +1,23 @@
+name: Publish
+
+# https://sergiodxa.com/articles/github-actions-npm-publish/
+# https://help.github.com/en/actions/language-and-framework-guides/publishing-nodejs-packages
+
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+      - run: npm install
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

@@ -226,7 +226,7 @@ const macros: {[key: string]: MacroMethod} = {
     world: async (): Promise<string> => {
         return Promise.resolve('world');
     },
-    greeting: (args: {name: string, greeting: string}): string => {
+    greeting: (args: {name: string; greeting: string}): Promise<string> => {
         // A more complex macro that takes arguments
         // it is a good idea to validate the args here
         if (!args.name) {
