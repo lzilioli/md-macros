@@ -39,7 +39,7 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
                 -   [inlineFile](#inlinefile)
 
-        -   [args](#args-1)
+                    -   [args](#args-1)
 
 -   [Custom macros](#custom-macros)
 
@@ -154,6 +154,7 @@ export async function replaceMacrosInMdUsageExample(): Promise<void> {
         ['*']
     );
     console.log(renderedWithSkipped);
+    // Hello [[youtube url="<youtube embed url>"]]
 }
 ```
 
@@ -205,7 +206,7 @@ This macro takes no arguments, and replaces the macro call with the table of con
 Inlines the contents of a file into the markdown document.
 Used within this readme for the Typedefs section.
 
-### args
+###### args
 
 `path`: path to the file to inline
 
