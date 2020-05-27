@@ -13,7 +13,9 @@
         "moduleResolution": "node",
         "baseUrl": "./",
         "paths": {
-            "@lib/*": ["lib/*"]
+            "@lib/*": ["lib/*"],
+            "@examples/*": ["examples/*"],
+            "@lzilioli/md-macros": ["./lib/entries/index.ts"]
         }
     },
     "types": [

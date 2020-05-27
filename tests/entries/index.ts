@@ -19,7 +19,7 @@ async function runTests(): Promise<void> {
         if (_.isFunction(test.test)) {
             await test.test();
         } else {
-            throw new Error('no compatible export found');
+            throw new Error('file named with .spec.ts must export async test function that executes the tests');
         }
     }
 }

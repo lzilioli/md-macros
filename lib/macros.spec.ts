@@ -35,7 +35,7 @@ allowfullscreen
 				return macros.inlineFile({} as {path: string}, '');
 			}, new Error('inlineFile macro requires path argument'));
         });
-        it('returns the contests of the file', async () => {
+        it('returns the contents of the file', async () => {
 			const inlineText: string = 'TEST INLINE';
 			mock({
 				'test': {
@@ -48,6 +48,15 @@ allowfullscreen
 				result,
 				inlineText
 			);
+		});
+		it('throws if the fine cant be found', async () => {
+			mock({
+				'test': {}
+			})
+			const path: string = 'test/test.md';
+			assert.rejects(() => {
+				return macros.inlineFile({path}, '');
+			}, new Error('File not found: test/test.md'));
         });
         it('works in a greater context', async () => {
 			const inlineText: string = `

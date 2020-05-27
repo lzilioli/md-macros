@@ -1,10 +1,10 @@
 import { replaceMacrosInMd } from "@lib/replace-macros-in-md";
 import * as macros from '@lib/macros';
-import { MacroMethod } from "@lib/entries/typedefs";
+import { MacroMethod } from "@lib/typedefs";
 import assert from "assert";
 
 export async function test(): Promise<void> {
-	describe( 'await replaceMacrosInMd', () => {
+	describe( 'replaceMacrosInMd', () => {
 		it('throws if macro is missing', () => {
 			assert.rejects(async ()=>{
 				return replaceMacrosInMd(`[[sampleMacro]]`, {});

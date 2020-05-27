@@ -7,6 +7,7 @@ module.exports = {
     binaryFolder: 'bin',
     publicFolder: 'public',
     clientFolder: 'client',
+    examplesFolder: 'examples',
     sassFolder: 'client/sass',
     testsFolder: 'tests',
     buildFolder: 'build',

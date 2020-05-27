@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import { Macro } from '@lib/entries/typedefs';
+import { Macro } from '@lib/typedefs';
 
 const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
 export function parseMacrosFromMd(md: string): Macro[] {

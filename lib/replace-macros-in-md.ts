@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import * as minimatch from 'minimatch';
-import { Macro, MacroMethod } from '@lib/entries/typedefs';
+import { Macro, MacroMethod } from '@lib/typedefs';
 import { parseMacrosFromMd } from '@lib/parse-macros-from-md';
 
 export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod}, skipMacroNamePatterns: string[] = []): Promise<string> {

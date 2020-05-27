@@ -1,5 +1,5 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
-import { Macro } from "@lib/entries/typedefs";
+import { Macro } from "@lib/typedefs";
 import assert from "assert";
 
 export async function test(): Promise<void> {

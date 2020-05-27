@@ -16,6 +16,8 @@ module.exports = merge([
 		},
 		resolve: {
 			alias: {
+				'@lzilioli/md-macros': path.resolve(path.join(appPaths.libFolder, 'entries') + '/index.ts'),
+				'@examples': path.resolve(appPaths.examplesFolder)
 			}
 		},
 		module: {
