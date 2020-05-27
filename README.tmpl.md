@@ -14,11 +14,9 @@ There have been lots of requests and proposals over the years for an official sp
 * https://stackoverflow.com/questions/24580042/github-markdown-are-macros-and-variables-possible
 * https://github.com/howardroark/Markdown-Macros
 
-To John Gruber's (the creator of Markdown) credit, he designed Markdown to be lightweight, and he has stuck to his original spec. It is unlikely we will see an
-overhaul to the markdown specification that would bring features like macros or more rich rendering capabilities to the markdown language itself.
+To John Gruber's (the creator of Markdown) credit, he designed Markdown to be lightweight, and he has stuck to his original spec. It is unlikely we will see an overhaul to the markdown specification that would bring features like macros or more rich rendering capabilities to the markdown language itself.
 
-The best thing about markdown is that it's plain text. It is easy to `pre-` or `post-` process any markdown text without interfering with other steps of the text
-processing pipeline. This is how `mdmacros` works. Technically, this module can work on any text, not just markdown.
+The best thing about markdown is that it's plain text. It is easy to `pre-` or `post-` process any markdown text without interfering with other steps of the text processing pipeline. This is how `mdmacros` works. Technically, this module can work on any text, not just markdown.
 
 ## Sample Use Case
 
@@ -39,7 +37,8 @@ This is not ideal for two reasons:
 `md-macros` lets you define your own macros that enable you to simplify the same file to this:
 
 ```md
-This is my super clean markdown document thanks to md-macros! This is all I need to type in order to include a video.
+This is my super clean markdown document thanks to md-macros! 
+This is all I need to type in order to include a video.
 [[youtube url="<youtube-embed-url>"]]
 ```
 
@@ -99,8 +98,7 @@ This method is where all of the magic happens.
 
 #### Bundled macros
 
-This package is intended to aid in the markdown processing pipeline by introducing
-the *concept* of macros. To that end, it doesn't provide many macros for consumption.
+This package is intended to aid in the markdown processing pipeline by introducing the *concept* of macros. To that end, it doesn't provide many macros for consumption.
 
 ##### youtube
 
@@ -127,11 +125,9 @@ Used within this readme for the Typedefs section.
 
 You can easily write your own macro methods. Be sure to specify all macros that you call in your text in the `macros` argument to `replaceMacrosInMd` when you call it.
 
-Macros are simple functions that take a single `args` object and return a string. They will
-be invoked against the text you pass to `replaceMacrosInMd`, using the args specified there.
+Macros are simple functions that take a single `args` object and return a string. They will be invoked against the text you pass to `replaceMacrosInMd`, using the args specified.
 
-You define what goes in the args object that is passed to the macro method. An example will
-help illustrate:
+You define what goes in the args object that is passed to the macro method. An example will help illustrate:
 
 ```typescript
 [[inlineFile path="examples/creating-macros-usage.ts"]]
