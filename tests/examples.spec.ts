@@ -42,8 +42,11 @@ export async function test(): Promise<void> {
                 assert.deepEqual(
                     loggedOutput,
                     [
-                        [ false ],
-                        [ 'Hello, User:\n        hello world' ]
+                        [`[[greeting greeting="Hello" name="User"]]
+    [[hello]] [[world]]`],
+                        [ true ],
+                        [ `Hello, User:
+    hello world` ]
                     ]
                 )
             });

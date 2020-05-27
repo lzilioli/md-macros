@@ -214,9 +214,14 @@ Used within this readme for the Typedefs section.
 
 You can easily write your own macro methods. Be sure to specify all macros that you call in your text in the `macros` argument to `replaceMacrosInMd` when you call it.
 
-Macros are simple functions that take a single `args` object and return a string. They will be invoked against the text you pass to `replaceMacrosInMd`, using the args specified.
+Macros are simple functions that take two arguments, and return a Promise for a string (refer to the `MacroMethod` typedef above.
 
-You define what goes in the args object that is passed to the macro method. An example will help illustrate:
+The arguments passed to the method are as follows:
+
+1. `args` object. This is a map containing whatever was passed to the macro in the markdown text. Each macro defines what goes in the args object that is passed to itself. The macro should take care to validate that it was passed the proper arguments, and throw if not.
+2. `mdText: string`. The text for the original markdown document with no replacements having been made. This is useful for macros such as the `mdToc` macro, which needs the full document in order to generate and return a table of contents.
+
+An example will help illustrate:
 
 ```typescript
 import {replaceMacrosInMd, MacroMethod} from '@lzilioli/md-macros';
@@ -226,7 +231,14 @@ export async function creatingMacrosUsageExample(): Promise<void> {
         hello: async  (): Promise<string> => {
             return Promise.resolve('hello');
         },
-        world: async (): Promise<string> => {
+        world: async (_args: unknown, mdText: string): Promise<string> => {
+            // this example shows that mdText (the original text) is passed as
+            // the second argument to the macro
+            console.log(mdText);
+            /*
+                [[greeting greeting="Hello" name="User"]]
+                    [[hello]] [[world]]
+             */
             return Promise.resolve('world');
         },
         greeting: (args: {name: string; greeting: string}): Promise<string> => {
@@ -242,13 +254,13 @@ export async function creatingMacrosUsageExample(): Promise<void> {
         }
     }
 
-
     const md: string = `[[greeting greeting="Hello" name="User"]]
-        [[hello]] [[world]]`;
+    [[hello]] [[world]]`;
 
     await replaceMacrosInMd(md, macros)
     .then((rendered: string) => {
-        console.log(rendered === `Hello, User:\n\thello world`); // true
+        console.log(rendered === `Hello, User:
+    hello world`); // true
         console.log(rendered);
         /*
             Hello User:

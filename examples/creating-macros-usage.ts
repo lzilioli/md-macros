@@ -5,7 +5,14 @@ export async function creatingMacrosUsageExample(): Promise<void> {
         hello: async  (): Promise<string> => {
             return Promise.resolve('hello');
         },
-        world: async (): Promise<string> => {
+        world: async (_args: unknown, mdText: string): Promise<string> => {
+            // this example shows that mdText (the original text) is passed as
+            // the second argument to the macro
+            console.log(mdText);
+            /*
+                [[greeting greeting="Hello" name="User"]]
+                    [[hello]] [[world]]
+             */
             return Promise.resolve('world');
         },
         greeting: (args: {name: string; greeting: string}): Promise<string> => {
@@ -21,13 +28,13 @@ export async function creatingMacrosUsageExample(): Promise<void> {
         }
     }
 
-
     const md: string = `[[greeting greeting="Hello" name="User"]]
-        [[hello]] [[world]]`;
+    [[hello]] [[world]]`;
 
     await replaceMacrosInMd(md, macros)
     .then((rendered: string) => {
-        console.log(rendered === `Hello, User:\n\thello world`); // true
+        console.log(rendered === `Hello, User:
+    hello world`); // true
         console.log(rendered);
         /*
             Hello User:
