@@ -26,4 +26,5 @@ export async function replaceMacrosInMdUsageExample(): Promise<void> {
         ['*']
     );
     console.log(renderedWithSkipped);
+    // Hello [[youtube url="<youtube embed url>"]]
 }

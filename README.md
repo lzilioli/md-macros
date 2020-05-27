@@ -59,7 +59,8 @@ The best thing about markdown is that it's plain text. It is easy to `pre-` or `
 If you want to embed a YouTube video in a markdown document without `mdmacros`, you'd do this:
 
 ```md
-This is my regular markdown document. If I wanted to include a youtube video embed, this is what I would do today:
+This is my regular markdown document. If I wanted to include
+a youtube video embed, this is what I would do today:
 
 <iframe width="560" height="315" src="<youtube-embed-url>"
     frameborder="0" allowfullscreen></iframe>
