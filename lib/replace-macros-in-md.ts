@@ -2,8 +2,9 @@ import * as _ from 'lodash';
 import * as minimatch from 'minimatch';
 import { Macro, MacroMethod } from '@lib/typedefs';
 import { parseMacrosFromMd } from '@lib/parse-macros-from-md';
+import * as myMacros from '@lib/macros';
 
-export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod}, skipMacroNamePatterns: string[] = []): Promise<string> {
+export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod} = myMacros, skipMacroNamePatterns: string[] = []): Promise<string> {
 	// Parse all macros out of the markdown string
 	const parsedMacros: Macro[] = parseMacrosFromMd(md);
 	const skippedMacros: string[] = [];

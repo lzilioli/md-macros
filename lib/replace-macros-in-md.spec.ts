@@ -1,5 +1,4 @@
 import { replaceMacrosInMd } from "@lib/replace-macros-in-md";
-import * as macros from '@lib/macros';
 import { MacroMethod } from "@lib/typedefs";
 import assert from "assert";
 
@@ -48,7 +47,7 @@ export async function test(): Promise<void> {
 			]]`;
 			const md: string = `test string ${macro0Text}
 				test string ${macro1Text}`;
-			const finalText: string = await replaceMacrosInMd(md, macros);
+			const finalText: string = await replaceMacrosInMd(md);
 			assert.equal(finalText, `test string <iframe
 width="560"
 height="315"
@@ -93,6 +92,6 @@ allowfullscreen
 				rendered,
 				`Hello, User:\n\thello world`
 			);
-        });
+		});
 	} );
 }
