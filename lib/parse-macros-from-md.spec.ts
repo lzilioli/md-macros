@@ -37,6 +37,16 @@ export async function test(): Promise<void> {
 			}])
 		});
 
+		it('lets you escape macros', () => {
+			// eslint-disable-next-line no-useless-escape
+			const macroText: string = `\\[[youtube
+				url="test"
+				arg1="val1"
+			]]`;
+			const macros: ParsedMacros = parseMacrosFromMd(macroText);
+			assert.deepEqual(macros.custom, []);
+		});
+
 		it('captures multiple macros', () => {
 			const macro0Text: string = `[[youtube url="test1"]]`;
 			const macro1Text: string = `[[youtube

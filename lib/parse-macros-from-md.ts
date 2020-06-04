@@ -2,7 +2,7 @@ import cheerio from 'cheerio';
 import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink } from '@lib/typedefs';
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
-	const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
+	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
@@ -14,6 +14,10 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	while (macroMatch) {
 		const macroText: string = macroMatch[1].trim();
 		const fullMatch: string = macroMatch[0];
+		if (fullMatch.startsWith('\\')) {
+			macroMatch = macroRegex.exec(md);
+			continue;
+		}
 		let firstSpaceIndex: number = macroText.indexOf(' ');
 		if (firstSpaceIndex === -1) {
 			firstSpaceIndex = macroText.indexOf('\n');
