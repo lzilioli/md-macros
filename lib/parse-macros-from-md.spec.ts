@@ -194,7 +194,7 @@ export async function test(): Promise<void> {
 ![hello][wat2]
 ![][wat2]
 
-[wat]: www.example3.com
+[wat]:			www.example3.com
 [wat2]: www.example4.com "Test title"
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
@@ -243,7 +243,7 @@ export async function test(): Promise<void> {
 					wat: {
 						value: 'www.example3.com',
 						title: '',
-						fullMatch: '[wat]: www.example3.com',
+						fullMatch: '[wat]:			www.example3.com',
 					},
 					wat2: {
 						value: 'www.example4.com',
