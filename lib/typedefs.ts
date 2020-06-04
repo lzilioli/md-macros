@@ -10,6 +10,7 @@ export interface Macro {
 export interface ParsedMacros {
 	img: ParsedImage[];
 	custom: Macro[];
+	references: ParsedReferences;
 }
 
 export interface ParsedImage {
@@ -17,4 +18,12 @@ export interface ParsedImage {
 	title: string;
 	altText: string;
 	fullMatch: string;
+}
+
+export interface ParsedReferences {
+	[key: string]: {
+		value: string;
+		title: string;
+		fullMatch: string;
+	};
 }

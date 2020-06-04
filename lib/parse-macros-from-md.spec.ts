@@ -76,12 +76,13 @@ export async function test(): Promise<void> {
 					src: "www.example.com/example.png",
 					title: "Title Text",
 					fullMatch: macro0Text
-				} , {
+				}, {
 					altText: "alt text2",
 					src: "www.example.com/example.png",
 					title: "Title Text2",
 					fullMatch: macro1Text
-				}]
+				}],
+				references: {}
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -101,12 +102,13 @@ export async function test(): Promise<void> {
 					src: "www.example.com/example.png",
 					title: "Title Text",
 					fullMatch: macro0Text
-				} , {
+				}, {
 					altText: "alt text2",
 					src: "www.example.com/example.png",
 					title: "",
 					fullMatch: macro1Text
-				}]
+				}],
+				references: {}
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -132,7 +134,43 @@ export async function test(): Promise<void> {
 					src: "www.example.com/example.png",
 					title: "Title Text",
 					fullMatch: macro0Text
-				}]
+				}],
+				references: {}
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('captures references', () => {
+			const md: string = `[arbitrary case-insensitive reference text]: https://www.mozilla.org
+[1]: http://slashdot.org
+[link text itself]: http://www.reddit.com
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {
+					'arbitrary case-insensitive reference text': {
+						value: 'https://www.mozilla.org',
+						fullMatch: '[arbitrary case-insensitive reference text]: https://www.mozilla.org',
+						title: '',
+					},
+					'1': {
+						value: 'http://slashdot.org',
+						fullMatch: '[1]: http://slashdot.org',
+						title: '',
+					},
+					'link text itself': {
+						value: 'http://www.reddit.com',
+						fullMatch: '[link text itself]: http://www.reddit.com',
+						title: '',
+					},
+					'logo': {
+						value: 'https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png',
+						fullMatch: '[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"',
+						title: "Logo Title Text 2",
+					}
+				}
 			};
 			assert.deepEqual(macros, expected);
 		});

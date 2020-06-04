@@ -1,10 +1,11 @@
 import cheerio from 'cheerio';
-import { Macro, ParsedMacros, ParsedImage } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage, ParsedReferences } from '@lib/typedefs';
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
 	const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
 	const inlineImgRegex: RegExp = /(!\[[^\]]*\]\([^)]+\))/gm;
 	const inlineImgPartsRexex: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
+	const referenceValsRegex: RegExp = /\[([^\]]+)\]: (.*)/gm;
 
 	const custom: Macro[] = [];
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
@@ -50,7 +51,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
 		const altText: string = partsMatch[1] || '';
 		const urlAndTitle: string = partsMatch[2];
-		const split: string[] = urlAndTitle.split(' ') as [string, string];
+		const split: string[] = urlAndTitle.split(' ');
 		const src: string = split.shift();
 		let title: string = split.join(' ').trim();
 		if (title.length && title.startsWith('"') && title.endsWith('"')) {
@@ -66,8 +67,34 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		})
 		imgMatch = inlineImgRegex.exec(md);
 	}
+
+	const references: ParsedReferences = {};
+	let referencesMatch: RegExpExecArray = referenceValsRegex.exec(md);
+	while (referencesMatch) {
+		const fullMatch: string = referencesMatch[0].trim();
+		const refKey: string = referencesMatch[1].trim();
+		const urlAndTitle: string = referencesMatch[2].trim();
+		const split: string[] = urlAndTitle.split(' ');
+		const value: string = split.shift();
+		let title: string = split.join(' ').trim();
+		if (title.length && title.startsWith('"') && title.endsWith('"')) {
+			title = title.substr(1, title.length - 2);
+		} else if (title.length) {
+			throw new Error(`Title should be wrapped in double quotes: ${title}`)
+		}
+		if (references[refKey]) {
+			throw new Error(`duplicate reference key encountered ${refKey}`);
+		}
+		references[refKey] = {
+			value,
+			fullMatch,
+			title
+		};
+		referencesMatch = referenceValsRegex.exec(md);
+	}
 	return {
 		custom,
-		img
+		img,
+		references
 	};
 }

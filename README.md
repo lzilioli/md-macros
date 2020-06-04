@@ -112,6 +112,7 @@ export interface Macro {
 export interface ParsedMacros {
 	img: ParsedImage[];
 	custom: Macro[];
+	references: ParsedReferences;
 }
 
 export interface ParsedImage {
@@ -119,6 +120,21 @@ export interface ParsedImage {
 	title: string;
 	altText: string;
 	fullMatch: string;
+}
+
+// export interface ParsedLink {
+// 	href: string;
+// 	title: string;
+// 	altText: string;
+// 	fullMatch: string;
+// }
+
+export interface ParsedReferences {
+	[key: string]: {
+		value: string;
+		title: string;
+		fullMatch: string;
+	};
 }
 ```
 
@@ -200,7 +216,8 @@ export async function parseMacrosFromMdUsageExample(): Promise<void> {
                 src: "www.example.com/example.png",
                 title: "Title Text",
                 fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
-            }]
+            }],
+            references: {}
         }
     */
 }
