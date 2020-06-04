@@ -181,6 +181,8 @@ export async function test(): Promise<void> {
 
 		it('captures links', () => {
 			const md: string = `[hello2]([[getLink test="what"]] "test title tex2t")
+[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
 [hello](www.example.com "test title text")
 ![huh](www.example.com/test.png "test img title text")]
 [hello][wat]
@@ -196,6 +198,18 @@ export async function test(): Promise<void> {
 						test: "what",
 					},
 					fullMatch: "[[getLink test=\"what\"]]",
+					name: "getLink",
+				}, {
+					args: {
+						test: "macro-hash-title",
+					},
+					fullMatch: "[[getLink test=\"macro-hash-title\"]]",
+					name: "getLink",
+				}, {
+					args: {
+						test: "macro-hash",
+					},
+					fullMatch: "[[getLink test=\"macro-hash\"]]",
 					name: "getLink",
 				}],
 				img: [{
@@ -221,6 +235,16 @@ export async function test(): Promise<void> {
 					href: '[[getLink test="what"]]',
 					altText: 'hello2',
 					fullMatch: `[hello2]([[getLink test="what"]] "test title tex2t")`
+				}, {
+					title: 'mht',
+					href: '[[getLink test="macro-hash-title"]]#ze-hash',
+					altText: 'macroWHashAndTitle',
+					fullMatch: `[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")`
+				}, {
+					title: '',
+					href: '[[getLink test="macro-hash"]]#ze-hash2',
+					altText: 'macroWHash',
+					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
 				}, {
 					title: 'test title text',
 					href: 'www.example.com',

@@ -55,9 +55,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		let src: string;
 		let title: string;
 		if (urlAndTitle.startsWith('[[')) {
-			const endOfMacroCall: number = urlAndTitle.indexOf(']]');
-			src = urlAndTitle.substr(0, endOfMacroCall + 2);
-			title = urlAndTitle.substr(endOfMacroCall+2, urlAndTitle.length).trim();
+			const endOfMacroCall: number = urlAndTitle.indexOf(']]') + 2;
+			const restOfString: string = urlAndTitle.substr(endOfMacroCall, urlAndTitle.length);
+			if (restOfString.startsWith(' ')) {
+				src = urlAndTitle.substr(0, endOfMacroCall).trim();
+				title = restOfString.trim();
+			} else {
+				const split: string[] = restOfString.split(' ');
+				src = urlAndTitle.substr(0, endOfMacroCall).trim() + split.shift().trim();
+				title = split.join(' ');
+			}
 		} else {
 			const split: string[] = urlAndTitle.split(' ');
 			src = split.shift();

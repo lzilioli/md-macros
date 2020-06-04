@@ -90,7 +90,38 @@ allowfullscreen
 [this is the link text](/blog/posts/this-the-slug2 "with a title")
 
 [1]: www.example.com`);
-        });
+		});
+
+		it('replaces macros within links', async () => {
+			const md: string = `[hello2]([[getLink test="what"]] "test title tex2t")
+[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
+[hello](www.example.com "test title text")
+![huh](www.example.com/test.png "test img title text")]
+[hello][wat]
+![hello][wat2]
+
+[wat]: www.example3.com
+[wat2]: www.example4.com "Test title"
+`;
+			const actual: string = await replaceMacrosInMd(md, {
+				getLink: (args: {test: string}) => {
+					return Promise.resolve(`/path/to/${args.test}`);
+				}
+			});
+			const expected: string = `[hello2](/path/to/what "test title tex2t")
+[macroWHashAndTitle](/path/to/macro-hash-title#ze-hash "mht")
+[macroWHash](/path/to/macro-hash#ze-hash2)
+[hello](www.example.com "test title text")
+![huh](www.example.com/test.png "test img title text")]
+[hello][wat]
+![hello][wat2]
+
+[wat]: www.example3.com
+[wat2]: www.example4.com "Test title"
+`;
+			assert.deepEqual(actual, expected);
+		})
 
 		it('works with the example from the readme', async () => {
 			const macros: {[key: string]: MacroMethod} = {
