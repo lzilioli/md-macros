@@ -6,7 +6,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]: (.*)/gm;
-	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]+)\]\[([^\]]*)\]/gm;
+	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 
 	const custom: Macro[] = [];
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);

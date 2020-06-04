@@ -192,6 +192,7 @@ export async function test(): Promise<void> {
 ![huh](www.example.com/test.png "test img title text")]
 [hello][wat]
 ![hello][wat2]
+![][wat2]
 
 [wat]: www.example3.com
 [wat2]: www.example4.com "Test title"
@@ -230,6 +231,13 @@ export async function test(): Promise<void> {
 					referenceKey: 'wat2',
 					src: "www.example4.com",
 					title: "hello",
+				}, {
+					altText: "",
+					fullMatch: "![][wat2]",
+					isReferenceStyle: true,
+					referenceKey: 'wat2',
+					src: "www.example4.com",
+					title: "",
 				}],
 				references: {
 					wat: {
