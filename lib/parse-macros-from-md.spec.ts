@@ -180,18 +180,48 @@ export async function test(): Promise<void> {
 		});
 
 		it('captures links', () => {
-			const md: string = `[hello](www.example.com "test title text") ![huh](www.example.com/test.png "test img title text")`;
+			const md: string = `[hello2]([[getLink test="what"]] "test title tex2t")
+[hello](www.example.com "test title text")
+![huh](www.example.com/test.png "test img title text")]
+[hello][wat]
+![hello][wat2]
+
+[wat]: www.example3.com
+[wat2]: www.example4.com "Test title"
+`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
+				custom: [{
+					args: {
+						test: "what",
+					},
+					fullMatch: "[[getLink test=\"what\"]]",
+					name: "getLink",
+				}],
 				img: [{
 					title: 'test img title text',
 					src: 'www.example.com/test.png',
 					altText: 'huh',
 					fullMatch: `![huh](www.example.com/test.png "test img title text")`
 				}],
-				references: {},
+				references: {
+					wat: {
+						value: 'www.example3.com',
+						title: '',
+						fullMatch: '[wat]: www.example3.com',
+					},
+					wat2: {
+						value: 'www.example4.com',
+						title: 'Test title',
+						fullMatch: '[wat2]: www.example4.com "Test title"',
+					}
+				},
 				links: [{
+					title: 'test title tex2t',
+					href: '[[getLink test="what"]]',
+					altText: 'hello2',
+					fullMatch: `[hello2]([[getLink test="what"]] "test title tex2t")`
+				}, {
 					title: 'test title text',
 					href: 'www.example.com',
 					altText: 'hello',

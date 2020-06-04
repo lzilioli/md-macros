@@ -1,6 +1,7 @@
 import { replaceMacrosInMd } from "@lib/replace-macros-in-md";
 import { MacroMethod } from "@lib/typedefs";
 import assert from "assert";
+import { macros } from "./entries";
 
 export async function test(): Promise<void> {
 	describe( 'replaceMacrosInMd', () => {
@@ -62,6 +63,33 @@ src="test2"
 frameborder="0"
 allowfullscreen
 ></iframe>`);
+		});
+
+		it('allows macro calls within links', async () => {
+			const md: string = `[[youtube url="test1"]]
+
+[this is the link text]([[postLink slug="this-the-slug"]])
+[this is the link text]([[postLink slug="this-the-slug2"]] "with a title")
+
+[1]: www.example.com`;
+			const finalText: string = await replaceMacrosInMd(md, {
+				postLink: (args: {slug: string}): Promise<string> => {
+					return Promise.resolve(`/blog/posts/${args.slug}`);
+				},
+				youtube: macros.youtube
+			});
+			assert.equal(finalText, `<iframe
+width="560"
+height="315"
+src="test1"
+frameborder="0"
+allowfullscreen
+></iframe>
+
+[this is the link text](/blog/posts/this-the-slug)
+[this is the link text](/blog/posts/this-the-slug2 "with a title")
+
+[1]: www.example.com`);
         });
 
 		it('works with the example from the readme', async () => {

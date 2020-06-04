@@ -52,9 +52,17 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
 		const altText: string = partsMatch[1] || '';
 		const urlAndTitle: string = partsMatch[2];
-		const split: string[] = urlAndTitle.split(' ');
-		const src: string = split.shift();
-		let title: string = split.join(' ').trim();
+		let src: string;
+		let title: string;
+		if (urlAndTitle.startsWith('[[')) {
+			const endOfMacroCall: number = urlAndTitle.indexOf(']]');
+			src = urlAndTitle.substr(0, endOfMacroCall + 2);
+			title = urlAndTitle.substr(endOfMacroCall+2, urlAndTitle.length).trim();
+		} else {
+			const split: string[] = urlAndTitle.split(' ');
+			src = split.shift();
+			title = split.join(' ').trim();
+		}
 		if (title.length && title.startsWith('"') && title.endsWith('"')) {
 			title = title.substr(1, title.length - 2);
 		} else if (title.length) {

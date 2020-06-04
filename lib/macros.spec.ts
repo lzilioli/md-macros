@@ -1,6 +1,6 @@
 import assert from 'assert';
 import * as macros from '@lib/macros';
-import { replaceMacrosInMd } from './replace-macros-in-md';
+import { replaceMacrosInMd } from '@lib/replace-macros-in-md';
 import * as mock from 'mock-fs';
 
 export async function test(): Promise<void> {
