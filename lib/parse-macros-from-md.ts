@@ -7,6 +7,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
+	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 
 	const custom: Macro[] = [];
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
@@ -146,6 +147,32 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			});
 		}
 		referencesImgOrLinkMatch = referenceImgOrLinkRegex.exec(md);
+	}
+
+	let selfReferenceMatch: RegExpExecArray = selfReferenceRegex.exec(md);
+	while (selfReferenceMatch) {
+		const fullMatch: string = selfReferenceMatch[0].trim();
+		const refKey: string = selfReferenceMatch[1].trim();
+		if (fullMatch.startsWith('!')) {
+			img.push({
+				src: (references[refKey] || {}).value,
+				title: refKey,
+				altText: '',
+				fullMatch,
+				isReferenceStyle: true,
+				referenceKey: refKey
+			});
+		} else {
+			links.push({
+				href: (references[refKey] || {}).value,
+				title: refKey,
+				altText: '',
+				fullMatch,
+				isReferenceStyle: true,
+				referenceKey: refKey
+			});
+		}
+		selfReferenceMatch = selfReferenceRegex.exec(md);
 	}
 
 	return {

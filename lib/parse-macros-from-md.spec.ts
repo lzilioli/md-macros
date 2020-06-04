@@ -193,9 +193,11 @@ export async function test(): Promise<void> {
 [hello][wat]
 ![hello][wat2]
 ![][wat2]
+[oh and this]
 
 [wat]:			www.example3.com
 [wat2]: www.example4.com "Test title"
+[oh and this]: www.example5.com
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -249,6 +251,11 @@ export async function test(): Promise<void> {
 						value: 'www.example4.com',
 						title: 'Test title',
 						fullMatch: '[wat2]: www.example4.com "Test title"',
+					},
+					'oh and this': {
+						fullMatch: "[oh and this]: www.example5.com",
+						title: "",
+						value: "www.example5.com",
 					}
 				},
 				links: [{
@@ -282,6 +289,13 @@ export async function test(): Promise<void> {
 					isReferenceStyle: true,
 					referenceKey: 'wat',
 					title: "hello",
+				}, {
+					altText: "",
+					fullMatch: "[oh and this]",
+					href: "www.example5.com",
+					isReferenceStyle: true,
+					referenceKey: 'oh and this',
+					title: "oh and this",
 				}],
 			};
 			assert.deepEqual(macros, expected);
