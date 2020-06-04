@@ -6,6 +6,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]: (.*)/gm;
+	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]+)\]\[([^\]]*)\]/gm;
 
 	const custom: Macro[] = [];
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
@@ -80,14 +81,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				src,
 				title,
 				altText,
-				fullMatch
+				fullMatch,
+				isReferenceStyle: false
 			});
 		} else {
 			links.push({
 				href: src,
 				title,
 				altText,
-				fullMatch
+				fullMatch,
+				isReferenceStyle: false,
 			});
 		}
 		imageOrLinkMatch = inlineImgOrLinkRegex.exec(md);
@@ -118,7 +121,30 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		referencesMatch = referenceValsRegex.exec(md);
 	}
 
-	// TODO parse reference links, reconcile with references
+	let referencesImgOrLinkMatch: RegExpExecArray = referenceImgOrLinkRegex.exec(md);
+	while (referencesImgOrLinkMatch) {
+		const fullMatch: string = referencesImgOrLinkMatch[0].trim();
+		const refText: string = referencesImgOrLinkMatch[1].trim();
+		const refKey: string = referencesImgOrLinkMatch[2].trim();
+		if (fullMatch.startsWith('!')) {
+			img.push({
+				src: (references[refKey] || {}).value,
+				title: refText,
+				altText: '',
+				fullMatch,
+				isReferenceStyle: true
+			});
+		} else {
+			links.push({
+				href: (references[refKey] || {}).value,
+				title: refText,
+				altText: '',
+				fullMatch,
+				isReferenceStyle: true,
+			});
+		}
+		referencesImgOrLinkMatch = referenceImgOrLinkRegex.exec(md);
+	}
 
 	return {
 		custom,

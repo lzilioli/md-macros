@@ -72,11 +72,13 @@ export async function test(): Promise<void> {
 			const expected: ParsedMacros = {
 				custom: [],
 				img: [{
+					isReferenceStyle: false,
 					altText: "alt text",
 					src: "www.example.com/example.png",
 					title: "Title Text",
 					fullMatch: macro0Text
 				}, {
+					isReferenceStyle: false,
 					altText: "alt text2",
 					src: "www.example.com/example.png",
 					title: "Title Text2",
@@ -99,11 +101,13 @@ export async function test(): Promise<void> {
 			const expected: ParsedMacros = {
 				custom: [],
 				img: [{
+					isReferenceStyle: false,
 					altText: "",
 					src: "www.example.com/example.png",
 					title: "Title Text",
 					fullMatch: macro0Text
 				}, {
+					isReferenceStyle: false,
 					altText: "alt text2",
 					src: "www.example.com/example.png",
 					title: "",
@@ -132,6 +136,7 @@ export async function test(): Promise<void> {
 					fullMatch: macro1Text,
 				}],
 				img: [{
+					isReferenceStyle: false,
 					altText: "alt text",
 					src: "www.example.com/example.png",
 					title: "Title Text",
@@ -216,7 +221,14 @@ export async function test(): Promise<void> {
 					title: 'test img title text',
 					src: 'www.example.com/test.png',
 					altText: 'huh',
+					isReferenceStyle: false,
 					fullMatch: `![huh](www.example.com/test.png "test img title text")`
+				}, {
+					altText: "",
+					fullMatch: "![hello][wat2]",
+					isReferenceStyle: true,
+					src: "www.example4.com",
+					title: "hello",
 				}],
 				references: {
 					wat: {
@@ -234,22 +246,32 @@ export async function test(): Promise<void> {
 					title: 'test title tex2t',
 					href: '[[getLink test="what"]]',
 					altText: 'hello2',
+					isReferenceStyle: false,
 					fullMatch: `[hello2]([[getLink test="what"]] "test title tex2t")`
 				}, {
 					title: 'mht',
 					href: '[[getLink test="macro-hash-title"]]#ze-hash',
 					altText: 'macroWHashAndTitle',
+					isReferenceStyle: false,
 					fullMatch: `[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")`
 				}, {
 					title: '',
 					href: '[[getLink test="macro-hash"]]#ze-hash2',
 					altText: 'macroWHash',
+					isReferenceStyle: false,
 					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
 				}, {
 					title: 'test title text',
 					href: 'www.example.com',
 					altText: 'hello',
+					isReferenceStyle: false,
 					fullMatch: `[hello](www.example.com "test title text")`
+				}, {
+					altText: "",
+					fullMatch: "[hello][wat]",
+					href: "www.example3.com",
+					isReferenceStyle: true,
+					title: "hello",
 				}],
 			};
 			assert.deepEqual(macros, expected);

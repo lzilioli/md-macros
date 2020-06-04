@@ -121,6 +121,7 @@ export interface ParsedImage {
 	title: string;
 	altText: string;
 	fullMatch: string;
+	isReferenceStyle: boolean;
 }
 
 export interface ParsedLink {
@@ -128,6 +129,7 @@ export interface ParsedLink {
 	title: string;
 	altText: string;
 	fullMatch: string;
+	isReferenceStyle: boolean;
 }
 
 export interface ParsedReferences {
@@ -213,6 +215,7 @@ export async function parseMacrosFromMdUsageExample(): Promise<void> {
                 fullMatch: '[[youtube url="<youtube embed url>"]]'
             }],
             img: [{
+                isReferenceStyle: false,
                 altText: "alt text",
                 src: "www.example.com/example.png",
                 title: "Title Text",

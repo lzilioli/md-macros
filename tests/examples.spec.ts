@@ -33,6 +33,7 @@ export async function test(): Promise<void> {
                                 fullMatch: '[[youtube url="<youtube embed url>"]]'
                             }],
                             img: [{
+                                isReferenceStyle: false,
                                 altText: "alt text",
                                 src: "www.example.com/example.png",
                                 title: "Title Text",

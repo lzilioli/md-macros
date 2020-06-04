@@ -19,6 +19,7 @@ export interface ParsedImage {
 	title: string;
 	altText: string;
 	fullMatch: string;
+	isReferenceStyle: boolean;
 }
 
 export interface ParsedLink {
@@ -26,6 +27,7 @@ export interface ParsedLink {
 	title: string;
 	altText: string;
 	fullMatch: string;
+	isReferenceStyle: boolean;
 }
 
 export interface ParsedReferences {
