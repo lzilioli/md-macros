@@ -5,3 +5,16 @@ export interface Macro {
 	args: unknown;
 	fullMatch: string;
 }
+
+// Returned from parseMacrosFromMd
+export interface ParsedMacros {
+	img: ParsedImage[];
+	custom: Macro[];
+}
+
+export interface ParsedImage {
+	src: string;
+	title: string;
+	altText: string;
+	fullMatch: string;
+}

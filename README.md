@@ -74,7 +74,7 @@ This is not ideal for two reasons:
 `md-macros` lets you define your own macros that enable you to simplify the same file to this:
 
 ```md
-This is my super clean markdown document thanks to md-macros! 
+This is my super clean markdown document thanks to md-macros!
 This is all I need to type in order to include a video.
 [[youtube url="<youtube-embed-url>"]]
 ```
@@ -105,6 +105,19 @@ export type MacroMethod = (args: unknown, mdText: string) => Promise<string>;
 export interface Macro {
 	name: string;
 	args: unknown;
+	fullMatch: string;
+}
+
+// Returned from parseMacrosFromMd
+export interface ParsedMacros {
+	img: ParsedImage[];
+	custom: Macro[];
+}
+
+export interface ParsedImage {
+	src: string;
+	title: string;
+	altText: string;
 	fullMatch: string;
 }
 ```
@@ -160,27 +173,35 @@ export async function replaceMacrosInMdUsageExample(): Promise<void> {
 
 #### parseMacrosFromMd
 
-`function parseMacrosFromMd(md: string): Macro[]`
+`function parseMacrosFromMd(md: string): ParsedMacros`
 
 ##### Usage
 
 ```typescript
-import {parseMacrosFromMd, Macro} from '@lzilioli/md-macros';
+import {parseMacrosFromMd, ParsedMacros} from '@lzilioli/md-macros';
 
 export async function parseMacrosFromMdUsageExample(): Promise<void> {
     const md: string = `
-        Hello [[youtube url="<youtube embed url>"]]
+        Hello [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
     `;
 
-    const macros: Macro[] = parseMacrosFromMd(md);
+    const macros: ParsedMacros = parseMacrosFromMd(md);
 
     console.log(macros)
     /*
-        [{
-            name: 'youtube',
-            args: { url: '<youtube embed url>' },
-            fullMatch: '[[youtube url="<youtube embed url>"]]'
-        }]
+        {
+            custom: [{
+                name: 'youtube',
+                args: { url: '<youtube embed url>' },
+                fullMatch: '[[youtube url="<youtube embed url>"]]'
+            }],
+            img: [{
+                altText: "alt text",
+                src: "www.example.com/example.png",
+                title: "\"Title",
+                fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
+            }]
+        }
     */
 }
 ```

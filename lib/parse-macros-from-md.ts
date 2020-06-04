@@ -1,13 +1,16 @@
 import cheerio from 'cheerio';
-import { Macro } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage } from '@lib/typedefs';
 
-const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
-export function parseMacrosFromMd(md: string): Macro[] {
-	const macros: Macro[] = [];
-	let match: RegExpExecArray = macroRegex.exec(md);
-	while (match) {
-		const macroText: string = match[1].trim();
-		const fullMatch: string = match[0];
+export function parseMacrosFromMd(md: string): ParsedMacros {
+	const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
+	const inlineImgRegex: RegExp = /(!\[[^\]]+\]\([^)]+\))/gm;
+	const inlineImgPartsRexex: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
+
+	const custom: Macro[] = [];
+	let macroMatch: RegExpExecArray = macroRegex.exec(md);
+	while (macroMatch) {
+		const macroText: string = macroMatch[1].trim();
+		const fullMatch: string = macroMatch[0];
 		let firstSpaceIndex: number = macroText.indexOf(' ');
 		if (firstSpaceIndex === -1) {
 			firstSpaceIndex = macroText.indexOf('\n');
@@ -31,12 +34,33 @@ export function parseMacrosFromMd(md: string): Macro[] {
 		const args: unknown = {
 			...$('div').attr()
 		};
-		macros.push({
+		custom.push({
 			name,
 			args,
 			fullMatch,
 		});
-		match = macroRegex.exec(md);
+		macroMatch = macroRegex.exec(md);
 	}
-	return macros;
+
+	const img: ParsedImage[] = [];
+	let imgMatch: RegExpExecArray = inlineImgRegex.exec(md);
+	while (imgMatch) {
+		const fullMatch: string = imgMatch[0].trim();
+		inlineImgPartsRexex.lastIndex = 0;
+		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
+		const altText: string = partsMatch[1];
+		const urlAndTitle: string = partsMatch[2];
+		const [src, title]: [string, string] = urlAndTitle.split(' ') as [string, string];
+		img.push({
+			src,
+			title,
+			altText,
+			fullMatch
+		})
+		imgMatch = inlineImgRegex.exec(md);
+	}
+	return {
+		custom,
+		img
+	};
 }

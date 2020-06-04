@@ -1,18 +1,26 @@
-import {parseMacrosFromMd, Macro} from '@lzilioli/md-macros';
+import {parseMacrosFromMd, ParsedMacros} from '@lzilioli/md-macros';
 
 export async function parseMacrosFromMdUsageExample(): Promise<void> {
     const md: string = `
-        Hello [[youtube url="<youtube embed url>"]]
+        Hello [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
     `;
 
-    const macros: Macro[] = parseMacrosFromMd(md);
+    const macros: ParsedMacros = parseMacrosFromMd(md);
 
     console.log(macros)
     /*
-        [{
-            name: 'youtube',
-            args: { url: '<youtube embed url>' },
-            fullMatch: '[[youtube url="<youtube embed url>"]]'
-        }]
+        {
+            custom: [{
+                name: 'youtube',
+                args: { url: '<youtube embed url>' },
+                fullMatch: '[[youtube url="<youtube embed url>"]]'
+            }],
+            img: [{
+                altText: "alt text",
+                src: "www.example.com/example.png",
+                title: "\"Title",
+                fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
+            }]
+        }
     */
 }

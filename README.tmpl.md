@@ -38,7 +38,7 @@ This is not ideal for two reasons:
 `md-macros` lets you define your own macros that enable you to simplify the same file to this:
 
 ```md
-This is my super clean markdown document thanks to md-macros! 
+This is my super clean markdown document thanks to md-macros!
 This is all I need to type in order to include a video.
 [[youtube url="<youtube-embed-url>"]]
 ```
@@ -89,7 +89,7 @@ This method is where all of the magic happens.
 
 #### parseMacrosFromMd
 
-`function parseMacrosFromMd(md: string): Macro[]`
+`function parseMacrosFromMd(md: string): ParsedMacros`
 
 ##### Usage
 

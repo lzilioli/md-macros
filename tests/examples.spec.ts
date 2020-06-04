@@ -26,11 +26,19 @@ export async function test(): Promise<void> {
                 assert.deepEqual(
                     loggedOutput,
                     [
-                        [[{
-                            name: 'youtube',
-                            args: { url: '<youtube embed url>' },
-                            fullMatch: '[[youtube url="<youtube embed url>"]]'
-                        }]]
+                        [{
+                            custom: [{
+                                name: 'youtube',
+                                args: { url: '<youtube embed url>' },
+                                fullMatch: '[[youtube url="<youtube embed url>"]]'
+                            }],
+                            img: [{
+                                altText: "alt text",
+                                src: "www.example.com/example.png",
+                                title: "\"Title",
+                                fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
+                            }]
+                        }]
                     ]
                 );
             });

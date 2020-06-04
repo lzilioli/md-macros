@@ -1,17 +1,17 @@
 import * as _ from 'lodash';
 import * as minimatch from 'minimatch';
-import { Macro, MacroMethod } from '@lib/typedefs';
+import { Macro, MacroMethod, ParsedMacros } from '@lib/typedefs';
 import { parseMacrosFromMd } from '@lib/parse-macros-from-md';
 import * as myMacros from '@lib/macros';
 
 export async function replaceMacrosInMd(md: string, macros: {[key: string]: MacroMethod} = myMacros, skipMacroNamePatterns: string[] = []): Promise<string> {
 	// Parse all macros out of the markdown string
-	const parsedMacros: Macro[] = parseMacrosFromMd(md);
+	const parsedMacros: ParsedMacros = parseMacrosFromMd(md);
 	const skippedMacros: string[] = [];
 
 	// Make sure all of the macros in the md string are defined as
 	// functions in our macros argument
-	_.each(parsedMacros, (macro: Macro) => {
+	_.each(parsedMacros.custom, (macro: Macro) => {
 		const skipThisMacro: boolean = _.some(skipMacroNamePatterns, (skipPattern: string) => {
 			return minimatch(macro.name, skipPattern);
 		});
@@ -30,8 +30,8 @@ export async function replaceMacrosInMd(md: string, macros: {[key: string]: Macr
 	// Execute each macro with its arguments, and replace its original
 	// reference in newString with its return value
 	let newString: string = md;
-	for(let i: number = 0; i < parsedMacros.length; i++) {
-		const macro: Macro = parsedMacros[i];
+	for(let i: number = 0; i < parsedMacros.custom.length; i++) {
+		const macro: Macro = parsedMacros.custom[i];
 		if (skippedMacros.indexOf(macro.name) !== -1) {
 			continue;
 		}
