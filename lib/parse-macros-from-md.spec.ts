@@ -74,12 +74,37 @@ export async function test(): Promise<void> {
 				img: [{
 					altText: "alt text",
 					src: "www.example.com/example.png",
-					title: "\"Title",
+					title: "Title Text",
 					fullMatch: macro0Text
 				} , {
 					altText: "alt text2",
 					src: "www.example.com/example.png",
-					title: "\"Title",
+					title: "Title Text2",
+					fullMatch: macro1Text
+				}]
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('captures image macros with no alt and title', () => {
+			const macro0Text: string = `![](www.example.com/example.png "Title Text")`;
+			const macro1Text: string = `![alt text2](www.example.com/example.png)`;
+			const md: string = `
+				test string ${macro0Text}
+				test string ${macro1Text}
+			`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [{
+					altText: "",
+					src: "www.example.com/example.png",
+					title: "Title Text",
+					fullMatch: macro0Text
+				} , {
+					altText: "alt text2",
+					src: "www.example.com/example.png",
+					title: "",
 					fullMatch: macro1Text
 				}]
 			};
@@ -105,7 +130,7 @@ export async function test(): Promise<void> {
 				img: [{
 					altText: "alt text",
 					src: "www.example.com/example.png",
-					title: "\"Title",
+					title: "Title Text",
 					fullMatch: macro0Text
 				}]
 			};

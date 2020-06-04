@@ -35,7 +35,7 @@ export async function test(): Promise<void> {
                             img: [{
                                 altText: "alt text",
                                 src: "www.example.com/example.png",
-                                title: "\"Title",
+                                title: "Title Text",
                                 fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
                             }]
                         }]

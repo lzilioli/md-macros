@@ -3,7 +3,7 @@ import { Macro, ParsedMacros, ParsedImage } from '@lib/typedefs';
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
 	const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
-	const inlineImgRegex: RegExp = /(!\[[^\]]+\]\([^)]+\))/gm;
+	const inlineImgRegex: RegExp = /(!\[[^\]]*\]\([^)]+\))/gm;
 	const inlineImgPartsRexex: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
 
 	const custom: Macro[] = [];
@@ -48,9 +48,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		const fullMatch: string = imgMatch[0].trim();
 		inlineImgPartsRexex.lastIndex = 0;
 		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
-		const altText: string = partsMatch[1];
+		const altText: string = partsMatch[1] || '';
 		const urlAndTitle: string = partsMatch[2];
-		const [src, title]: [string, string] = urlAndTitle.split(' ') as [string, string];
+		const split: string[] = urlAndTitle.split(' ') as [string, string];
+		const src: string = split.shift();
+		let title: string = split.join(' ').trim();
+		if (title.length && title.startsWith('"') && title.endsWith('"')) {
+			title = title.substr(1, title.length - 2);
+		} else if (title.length) {
+			throw new Error(`Title should be wrapped in double quotes: ${title}`)
+		}
 		img.push({
 			src,
 			title,
