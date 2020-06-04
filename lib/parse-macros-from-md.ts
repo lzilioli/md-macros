@@ -132,7 +132,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				title: refText,
 				altText: '',
 				fullMatch,
-				isReferenceStyle: true
+				isReferenceStyle: true,
+				referenceKey: refKey
 			});
 		} else {
 			links.push({
@@ -141,6 +142,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				altText: '',
 				fullMatch,
 				isReferenceStyle: true,
+				referenceKey: refKey
 			});
 		}
 		referencesImgOrLinkMatch = referenceImgOrLinkRegex.exec(md);

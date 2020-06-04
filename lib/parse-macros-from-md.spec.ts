@@ -227,6 +227,7 @@ export async function test(): Promise<void> {
 					altText: "",
 					fullMatch: "![hello][wat2]",
 					isReferenceStyle: true,
+					referenceKey: 'wat2',
 					src: "www.example4.com",
 					title: "hello",
 				}],
@@ -271,6 +272,7 @@ export async function test(): Promise<void> {
 					fullMatch: "[hello][wat]",
 					href: "www.example3.com",
 					isReferenceStyle: true,
+					referenceKey: 'wat',
 					title: "hello",
 				}],
 			};
