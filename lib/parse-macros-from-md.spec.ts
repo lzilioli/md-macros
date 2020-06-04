@@ -82,7 +82,8 @@ export async function test(): Promise<void> {
 					title: "Title Text2",
 					fullMatch: macro1Text
 				}],
-				references: {}
+				references: {},
+				links: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -108,7 +109,8 @@ export async function test(): Promise<void> {
 					title: "",
 					fullMatch: macro1Text
 				}],
-				references: {}
+				references: {},
+				links: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -135,7 +137,8 @@ export async function test(): Promise<void> {
 					title: "Title Text",
 					fullMatch: macro0Text
 				}],
-				references: {}
+				references: {},
+				links: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -170,7 +173,30 @@ export async function test(): Promise<void> {
 						fullMatch: '[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"',
 						title: "Logo Title Text 2",
 					}
-				}
+				},
+				links: [],
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('captures links', () => {
+			const md: string = `[hello](www.example.com "test title text") ![huh](www.example.com/test.png "test img title text")`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [{
+					title: 'test img title text',
+					src: 'www.example.com/test.png',
+					altText: 'huh',
+					fullMatch: `![huh](www.example.com/test.png "test img title text")`
+				}],
+				references: {},
+				links: [{
+					title: 'test title text',
+					href: 'www.example.com',
+					altText: 'hello',
+					fullMatch: `[hello](www.example.com "test title text")`
+				}],
 			};
 			assert.deepEqual(macros, expected);
 		});

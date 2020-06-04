@@ -21,7 +21,8 @@ export async function parseMacrosFromMdUsageExample(): Promise<void> {
                 title: "Title Text",
                 fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
             }],
-            references: {}
+            references: {},
+            links: []s,
         }
     */
 }

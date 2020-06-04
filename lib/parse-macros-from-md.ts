@@ -1,10 +1,10 @@
 import cheerio from 'cheerio';
-import { Macro, ParsedMacros, ParsedImage, ParsedReferences } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink } from '@lib/typedefs';
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
 	const macroRegex: RegExp = /\[\[((?:[\n]|[^\]])+)\]\]/gm;
-	const inlineImgRegex: RegExp = /(!\[[^\]]*\]\([^)]+\))/gm;
-	const inlineImgPartsRexex: RegExp = /!\[([^\]]*)\]\(([^)]+)\)/g;
+	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
+	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]: (.*)/gm;
 
 	const custom: Macro[] = [];
@@ -44,9 +44,10 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	}
 
 	const img: ParsedImage[] = [];
-	let imgMatch: RegExpExecArray = inlineImgRegex.exec(md);
-	while (imgMatch) {
-		const fullMatch: string = imgMatch[0].trim();
+	const links: ParsedLink[] = [];
+	let imageOrLinkMatch: RegExpExecArray = inlineImgOrLinkRegex.exec(md);
+	while (imageOrLinkMatch) {
+		const fullMatch: string = imageOrLinkMatch[0].trim();
 		inlineImgPartsRexex.lastIndex = 0;
 		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
 		const altText: string = partsMatch[1] || '';
@@ -59,13 +60,22 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		} else if (title.length) {
 			throw new Error(`Title should be wrapped in double quotes: ${title}`)
 		}
-		img.push({
-			src,
-			title,
-			altText,
-			fullMatch
-		})
-		imgMatch = inlineImgRegex.exec(md);
+		if (fullMatch.startsWith('!')) {
+			img.push({
+				src,
+				title,
+				altText,
+				fullMatch
+			});
+		} else {
+			links.push({
+				href: src,
+				title,
+				altText,
+				fullMatch
+			});
+		}
+		imageOrLinkMatch = inlineImgOrLinkRegex.exec(md);
 	}
 
 	const references: ParsedReferences = {};
@@ -92,9 +102,13 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		};
 		referencesMatch = referenceValsRegex.exec(md);
 	}
+
+	// TODO parse reference links, reconcile with references
+
 	return {
 		custom,
 		img,
-		references
+		references,
+		links
 	};
 }

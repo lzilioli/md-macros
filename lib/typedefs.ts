@@ -11,10 +11,18 @@ export interface ParsedMacros {
 	img: ParsedImage[];
 	custom: Macro[];
 	references: ParsedReferences;
+	links: ParsedLink[];
 }
 
 export interface ParsedImage {
 	src: string;
+	title: string;
+	altText: string;
+	fullMatch: string;
+}
+
+export interface ParsedLink {
+	href: string;
 	title: string;
 	altText: string;
 	fullMatch: string;
