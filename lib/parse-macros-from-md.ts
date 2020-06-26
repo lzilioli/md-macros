@@ -166,7 +166,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				isReferenceStyle: true,
 				referenceKey: refKey
 			});
-		} else {
+		} else if (fullMatch !== '[ ]' && fullMatch.toLowerCase() !== '[x]') {
 			links.push({
 				href: (references[refKey] || {}).value,
 				title: refKey,

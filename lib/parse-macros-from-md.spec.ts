@@ -158,6 +158,24 @@ export async function test(): Promise<void> {
 			assert.deepEqual(macros, expected);
 		});
 
+		it('does not complain about TODO checkboxes', () => {
+			const md: string = `# This is a document
+
+- [ ] I want to have a checkbox
+- [x] Here's a thing I finished
+
+Thank you for attending my talk.
+			`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+			};
+			assert.deepEqual(macros, expected);
+		});
+
 		it('captures references', () => {
 			const md: string = `[arbitrary case-insensitive reference text]: https://www.mozilla.org
 [1]: http://slashdot.org
