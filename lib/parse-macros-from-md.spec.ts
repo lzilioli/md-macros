@@ -328,5 +328,28 @@ Thank you for attending my talk.
 			};
 			assert.deepEqual(macros, expected);
 		});
+
+		it('skips over reference-style links within code snippets', () => {
+			const md: string = `# Intro
+What it do baby?
+
+This is the offending code snippet: \`queryResults[<array index>].address\`
+
+This is an offending code block:
+
+\`\`\`
+if (!_.isArray(results)) {
+	results = [results];
+}
+\`\`\``;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+			};
+			assert.deepEqual(macros, expected);
+		});
 	} );
 }

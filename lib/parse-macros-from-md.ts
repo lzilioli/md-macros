@@ -1,5 +1,19 @@
+import {some} from 'lodash';
 import cheerio from 'cheerio';
 import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink } from '@lib/typedefs';
+
+// TODO expose parsed code blocks out of this method. it is currently kept internal
+interface CodeBlock {
+	index: number;
+	length: number;
+	content: string;
+}
+
+function isIndexWithinCodeBlocks(index: number, codeBlocks: CodeBlock[]): boolean {
+	return some(codeBlocks, (codeBlock: CodeBlock): boolean => {
+		return index >= codeBlock.index || index <= codeBlock.index + codeBlock.length;
+	});
+}
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
 	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
@@ -8,6 +22,19 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
+	const codeBlocksRegex: RegExp = /(`{1,3}.+?`{1,3})/gms;
+
+	const codeBlocks: CodeBlock[] = [];
+	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
+	while(codeBlockMatch) {
+		const codeBlockText: string = codeBlockMatch[0];
+		codeBlocks.push({
+			index: codeBlockMatch.index,
+			length: codeBlockText.length,
+			content: codeBlockText
+		});
+		codeBlockMatch = codeBlocksRegex.exec(md);
+	}
 
 	const custom: Macro[] = [];
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
@@ -167,14 +194,17 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				referenceKey: refKey
 			});
 		} else if (fullMatch !== '[ ]' && fullMatch.toLowerCase() !== '[x]') {
-			links.push({
-				href: (references[refKey] || {}).value,
-				title: refKey,
-				altText: '',
-				fullMatch,
-				isReferenceStyle: true,
-				referenceKey: refKey
-			});
+			const isWithinCodeBlocks: boolean = isIndexWithinCodeBlocks(selfReferenceMatch.index, codeBlocks);
+			if (!isWithinCodeBlocks) {
+				links.push({
+					href: (references[refKey] || {}).value,
+					title: refKey,
+					altText: '',
+					fullMatch,
+					isReferenceStyle: true,
+					referenceKey: refKey
+				});
+			}
 		}
 		selfReferenceMatch = selfReferenceRegex.exec(md);
 	}
