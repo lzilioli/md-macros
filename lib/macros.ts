@@ -47,7 +47,12 @@ export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> =
                     // with the calling code.
                     nope(new Error('TOC could not be found'));
                 }
-                yep(match[1].replace(`-   [Table Of Contents End](#table-of-contents-end)\n\n`, '').trim());
+                yep(
+                    match[1]
+                        .replace(`-   [Table Of Contents End](#table-of-contents-end)\n`, '')
+                        .replace(`# Table Of Contents\n\n\n`, `# Table Of Contents\n\n`)
+                        .trim()
+                    );
             });
         });
     });

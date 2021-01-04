@@ -5,15 +5,17 @@ import * as mock from 'mock-fs';
 
 export async function test(): Promise<void> {
 	describe( 'youtube macro', () => {
-        it('throws if no url', () => {
+
+		it('throws if no url', () => {
             assert.throws((): void => {
 				macros.youtube({} as {url: string}, '');
 			}, new Error('youtube macro requires url argument'));
-        });
+		});
+
         it('replaces the url properly', async () => {
 			const url: string = 'TESTING';
 			const result: string = await macros.youtube({url}, '');
-			assert.equal(
+			assert.strictEqual(
 				result,
 				`<iframe
 width="560"
@@ -23,18 +25,22 @@ frameborder="0"
 allowfullscreen
 ></iframe>`
 			);
-        });
+		});
+
 	} );
 
 	describe( 'inlineFile macro', () => {
+
 		afterEach(()=>{
 			mock.restore();
 		})
+
 		it('throws if no path', () => {
             assert.rejects((): Promise<string> => {
 				return macros.inlineFile({} as {path: string}, '');
 			}, new Error('inlineFile macro requires path argument'));
-        });
+		});
+
         it('returns the contents of the file', async () => {
 			const inlineText: string = 'TEST INLINE';
 			mock({
@@ -44,11 +50,12 @@ allowfullscreen
 			})
 			const path: string = 'test/test.md';
 			const result: string = await macros.inlineFile({path}, '');
-			assert.equal(
+			assert.strictEqual(
 				result,
 				inlineText
 			);
 		});
+
 		it('throws if the fine cant be found', async () => {
 			mock({
 				'test': {}
@@ -57,7 +64,8 @@ allowfullscreen
 			assert.rejects(() => {
 				return macros.inlineFile({path}, '');
 			}, new Error('File not found: test/test.md'));
-        });
+		});
+
         it('works in a greater context', async () => {
 			const inlineText: string = `
 
@@ -82,7 +90,7 @@ allowfullscreen
 			const result: string = await replaceMacrosInMd(mdText, {
 				inlineFile: macros.inlineFile
 			});
-			assert.equal(
+			assert.strictEqual(
 				result,
 				`${mdBeforeInline}${inlineText.trim()}${mdAfterInline}`
 			);
@@ -90,6 +98,7 @@ allowfullscreen
 	} );
 
 	describe( 'mdToc macro', () => {
+
 		it('returns the table of contents', async () => {
 			const result: string = await macros.mdToc({}, `Hello this is a markdown file.
 
@@ -122,6 +131,7 @@ jk
 ### Ok, it works!
 
 finally...`);
+
 			const expected: string = `# Table Of Contents
 
 -   [Some Other Section](#some-other-section)
@@ -135,7 +145,33 @@ finally...`);
     -   [Nope](#nope)
 
         -   [Ok, it works!](#ok-it-works)`;
-			assert.equal(
+			assert.strictEqual(
+				result,
+				expected
+			);
+		});
+
+		it('does not leak Table Of Contents End header', async () => {
+			const result: string = await macros.mdToc({}, `---
+title: A markown file with some front matter
+---
+#aTag
+
+[[mdToc]]
+
+# A heading
+
+Hello
+
+# Another One!`);
+
+			const expected: string = `# Table Of Contents
+
+-   [A heading](#a-heading)
+-   [Another One!](#another-one)`;
+			console.log(`"${result}"`)
+			console.log(`"${expected}"`)
+			assert.strictEqual(
 				result,
 				expected
 			);
@@ -216,7 +252,7 @@ jk
 ### Ok, it works!
 
 finally...`;
-			assert.equal(
+			assert.strictEqual(
 				result,
 				expected
 			);
