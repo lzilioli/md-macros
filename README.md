@@ -115,6 +115,7 @@ export interface ParsedMacros {
 	references: ParsedReferences;
 	links: ParsedLink[];
 	codeBlocks: ParsedCodeBlock[];
+	tags: ParsedCodeBlock[];
 }
 
 export interface ParsedImage {

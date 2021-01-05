@@ -97,6 +97,7 @@ export async function test(): Promise<void> {
 				references: {},
 				links: [],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -127,6 +128,7 @@ export async function test(): Promise<void> {
 				references: {},
 				links: [],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -157,6 +159,7 @@ export async function test(): Promise<void> {
 				references: {},
 				links: [],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -176,6 +179,7 @@ Thank you for attending my talk.
 				references: {},
 				links: [],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -213,6 +217,7 @@ Thank you for attending my talk.
 				},
 				links: [],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -331,6 +336,7 @@ Thank you for attending my talk.
 					title: "oh and this",
 				}],
 				codeBlocks: [],
+				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -363,6 +369,78 @@ if (!_.isArray(results)) {
 					index: 135,
 					length: 58
 				}],
+				tags: []
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('parses tags from macros', () => {
+			const md: string = `---
+title: Pagination Shortcut
+isDraft: true
+thumbnail:
+  icon: "asterisk"
+---
+#sample, #sample-tag
+
+# Header
+
+Test file 1 contents #sample-4
+
+#sample-3
+
+These should get excluded:
+
+[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [{
+					args: {
+						test: "macro-hash-title",
+					},
+					fullMatch: "[[getLink test=\"macro-hash-title\"]]",
+					name: "getLink",
+				}, {
+					args: {
+						test: "macro-hash",
+					},
+					fullMatch: "[[getLink test=\"macro-hash\"]]",
+					name: "getLink",
+				}],
+				img: [],
+				references: {},
+				links: [{
+					title: 'mht',
+					href: '[[getLink test="macro-hash-title"]]#ze-hash',
+					altText: 'macroWHashAndTitle',
+					isReferenceStyle: false,
+					fullMatch: `[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")`
+				}, {
+					title: '',
+					href: '[[getLink test="macro-hash"]]#ze-hash2',
+					altText: 'macroWHash',
+					isReferenceStyle: false,
+					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
+				}],
+				codeBlocks: [],
+				tags: [{
+					content: "#sample",
+					index: 79,
+					length: 7,
+				}, {
+					content: "#sample-tag",
+					index: 88,
+					length: 11,
+				}, {
+					content: "#sample-4",
+					index: 132,
+					length: 9,
+				}, {
+					content: "#sample-3",
+					index: 143,
+					length: 9,
+				}]
 			};
 			assert.deepEqual(macros, expected);
 		});
