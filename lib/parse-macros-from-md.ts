@@ -1,16 +1,9 @@
 import {some} from 'lodash';
 import cheerio from 'cheerio';
-import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock } from '@lib/typedefs';
 
-// TODO expose parsed code blocks out of this method. it is currently kept internal
-interface CodeBlock {
-	index: number;
-	length: number;
-	content: string;
-}
-
-function isIndexWithinCodeBlocks(index: number, codeBlocks: CodeBlock[]): boolean {
-	return some(codeBlocks, (codeBlock: CodeBlock): boolean => {
+function isIndexWithinCodeBlocks(index: number, codeBlocks: ParsedCodeBlock[]): boolean {
+	return some(codeBlocks, (codeBlock: ParsedCodeBlock): boolean => {
 		return index >= codeBlock.index || index <= codeBlock.index + codeBlock.length;
 	});
 }
@@ -24,7 +17,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const codeBlocksRegex: RegExp = /(`{1,3}.+?`{1,3})/gms;
 
-	const codeBlocks: CodeBlock[] = [];
+	const codeBlocks: ParsedCodeBlock[] = [];
 	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
 	while(codeBlockMatch) {
 		const codeBlockText: string = codeBlockMatch[0];
@@ -213,6 +206,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		custom,
 		img,
 		references,
-		links
+		links,
+		codeBlocks
 	};
 }

@@ -41,6 +41,7 @@ export async function test(): Promise<void> {
                             }],
                             references: {},
                             links: [],
+                            codeBlocks: [],
                         }]
                     ]
                 );

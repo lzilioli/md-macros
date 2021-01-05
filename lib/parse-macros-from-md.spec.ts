@@ -4,7 +4,7 @@ import { ParsedMacros } from "./entries";
 
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
-        it('works with no args', () => {
+		it('works with no args', () => {
 			const macroText: string = `[[sampleMacro]]`;
 			const macros: ParsedMacros = parseMacrosFromMd(macroText);
 			assert.deepEqual(macros.custom, [{
@@ -96,6 +96,7 @@ export async function test(): Promise<void> {
 				}],
 				references: {},
 				links: [],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -125,6 +126,7 @@ export async function test(): Promise<void> {
 				}],
 				references: {},
 				links: [],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -154,6 +156,7 @@ export async function test(): Promise<void> {
 				}],
 				references: {},
 				links: [],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -172,6 +175,7 @@ Thank you for attending my talk.
 				img: [],
 				references: {},
 				links: [],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -208,6 +212,7 @@ Thank you for attending my talk.
 					}
 				},
 				links: [],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -325,6 +330,7 @@ Thank you for attending my talk.
 					referenceKey: 'oh and this',
 					title: "oh and this",
 				}],
+				codeBlocks: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -348,6 +354,15 @@ if (!_.isArray(results)) {
 				img: [],
 				references: {},
 				links: [],
+				codeBlocks: [{
+					content: '`queryResults[<array index>].address`',
+					index: 62,
+					length: 37
+				}, {
+					content: '```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```',
+					index: 135,
+					length: 58
+				}],
 			};
 			assert.deepEqual(macros, expected);
 		});

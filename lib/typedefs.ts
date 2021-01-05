@@ -12,6 +12,7 @@ export interface ParsedMacros {
 	custom: Macro[];
 	references: ParsedReferences;
 	links: ParsedLink[];
+	codeBlocks: ParsedCodeBlock[];
 }
 
 export interface ParsedImage {
@@ -38,4 +39,10 @@ export interface ParsedReferences {
 		title: string;
 		fullMatch: string;
 	};
+}
+
+export interface ParsedCodeBlock {
+	index: number;
+	length: number;
+	content: string;
 }
