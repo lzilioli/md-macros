@@ -342,8 +342,13 @@ Thank you for attending my talk.
 		});
 
 		it('skips over reference-style links within code snippets', () => {
-			const md: string = `# Intro
-What it do baby?
+			const md: string = `
+\`some-code\`\`some-more-code\`
+
+\`\`\`
+fuck all
+\`\`\`
+
 
 This is the offending code snippet: \`queryResults[<array index>].address\`
 
@@ -353,7 +358,8 @@ This is an offending code block:
 if (!_.isArray(results)) {
 	results = [results];
 }
-\`\`\``;
+\`\`\`
+`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
@@ -361,13 +367,58 @@ if (!_.isArray(results)) {
 				references: {},
 				links: [],
 				codeBlocks: [{
-					content: '`queryResults[<array index>].address`',
-					index: 62,
-					length: 37
+					index: 1,
+					length: 11,
+					content: "`some-code`"
+				},
+				{
+					index: 12,
+					length: 16,
+					content: "`some-more-code`"
+				},
+				{
+					index: 30,
+					length: 16,
+					content: "```\nfuck all\n```"
+				},
+				{
+					index: 43,
+					length: 43,
+					content: "```\n\n\nThis is the offending code snippet: `"
+				},
+				{
+					index: 119,
+					length: 42,
+					content: "```\n\nThis is an offending code block:\n\n```"
+				},
+				{
+					index: 158,
+					length: 58,
+					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```"
+				}],
+				tags: []
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('properly parses back-to-back code blocks', () => {
+			const md: string = `
+\`some-code\`\`some-more-code\`
+`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+				codeBlocks: [{
+					content: '`some-code`',
+					index: 1,
+					length: 11
 				}, {
-					content: '```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```',
-					index: 135,
-					length: 58
+					content: '`some-more-code`',
+					index: 12,
+					length: 16
 				}],
 				tags: []
 			};

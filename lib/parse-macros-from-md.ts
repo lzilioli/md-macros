@@ -15,15 +15,23 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
-	const codeBlocksRegex: RegExp = /(`{1,3}.+?`{1,3})/gms;
+	const codeBlocksRegex: RegExp = /((?:`{1}|`{3})[^`]+?(?:`{1}|`{3}))/gms;
 	const tagRegex: RegExp = /\s(#[^\s,#)]+),?/gms;
 
 	const codeBlocks: ParsedCodeBlock[] = [];
 	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
 	while(codeBlockMatch) {
-		const codeBlockText: string = codeBlockMatch[0];
+		let codeBlockText: string = codeBlockMatch[0];
+		let index: number = codeBlockMatch.index;
+		if (codeBlockText.startsWith('`\n') && !codeBlockText.startsWith('```\n')) {
+			index -= 2;
+			codeBlockText = codeBlockText.replace('`\n', '```\n');
+		}
+		if (codeBlockText.endsWith('\n`') && !codeBlockText.endsWith('\n```')) {
+			codeBlockText = codeBlockText.replace('\n`', '\n```');
+		}
 		codeBlocks.push({
-			index: codeBlockMatch.index,
+			index,
 			length: codeBlockText.length,
 			content: codeBlockText
 		});
