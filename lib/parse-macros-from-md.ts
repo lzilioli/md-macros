@@ -219,10 +219,13 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		if (fullMatch.startsWith('\n')) {
 			fullMatch = fullMatch.substr(1);
 		}
-		tags.push({
-			tag: tagText,
-			fullMatch,
-		});
+		const isNumericalTag: boolean = /^#\d+$/gms.test(tagText);
+		if (!isNumericalTag) {
+			tags.push({
+				tag: tagText,
+				fullMatch,
+			});
+		}
 		tagsMatch = tagRegex.exec(md);
 	}
 
