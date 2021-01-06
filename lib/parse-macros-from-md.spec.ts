@@ -425,19 +425,23 @@ These should get excluded:
 				}],
 				codeBlocks: [],
 				tags: [{
-					content: "#sample",
+					tag: "#sample",
+					fullMatch: "#sample, ",
 					index: 79,
 					length: 7,
 				}, {
-					content: "#sample-tag",
+					tag: "#sample-tag",
+					fullMatch: "#sample-tag",
 					index: 88,
 					length: 11,
 				}, {
-					content: "#sample-4",
+					tag: "#sample-4",
+					fullMatch: "#sample-4",
 					index: 132,
 					length: 9,
 				}, {
-					content: "#sample-3",
+					tag: "#sample-3",
+					fullMatch: "#sample-3",
 					index: 143,
 					length: 9,
 				}]
