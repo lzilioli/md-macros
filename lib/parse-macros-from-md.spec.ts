@@ -396,7 +396,8 @@ Test file 1 contents #sample-4
 These should get excluded:
 
 [macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
-[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`;
+[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
+[Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [{
@@ -426,6 +427,12 @@ These should get excluded:
 					altText: 'macroWHash',
 					isReferenceStyle: false,
 					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
+				}, {
+					altText: "Sublime Text's multiple selections feature",
+					fullMatch: "[Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)",
+					href: "https://www.sublimetext.com#multiple-selections",
+					isReferenceStyle: false,
+					title: "",
 				}],
 				codeBlocks: [],
 				tags: [{

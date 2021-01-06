@@ -207,12 +207,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
 		const tagText: string = tagsMatch[1];
-		tags.push({
-			index: tagsMatch.index,
-			length: tagText.length,
-			tag: tagText,
-			fullMatch: tagsMatch[0],
-		});
+		// we skip over tags ending with ). These are anchor-style links that
+		// were wrongly matched by our tagRegex
+		if (!tagText.endsWith(')')) {
+			tags.push({
+				index: tagsMatch.index,
+				length: tagText.length,
+				tag: tagText,
+				fullMatch: tagsMatch[0],
+			});
+		}
 		tagsMatch = tagRegex.exec(md);
 	}
 
