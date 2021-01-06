@@ -385,6 +385,10 @@ thumbnail:
 
 # Header
 
+Hello
+
+## Nested Header
+
 Test file 1 contents #sample-4
 
 #sample-3
@@ -437,12 +441,12 @@ These should get excluded:
 				}, {
 					tag: "#sample-4",
 					fullMatch: "#sample-4",
-					index: 132,
+					index: 157,
 					length: 9,
 				}, {
 					tag: "#sample-3",
 					fullMatch: "#sample-3",
-					index: 143,
+					index: 168,
 					length: 9,
 				}]
 			};

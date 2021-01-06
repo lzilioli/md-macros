@@ -16,7 +16,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const codeBlocksRegex: RegExp = /(`{1,3}.+?`{1,3})/gms;
-	const tagRegex: RegExp = /(?<!\])(#[^\s,]+),? ?/gms;
+	const tagRegex: RegExp = /(?<!\])(#[^\s,#]+),? ?/gms;
 
 	const codeBlocks: ParsedCodeBlock[] = [];
 	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
