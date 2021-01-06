@@ -490,18 +490,28 @@ Hello this is the #1 rule. Exclude numbers. Jumpman #23, but allow stuff like #1
 				tags: [{
 					tag: "#sample",
 					fullMatch: "#sample,",
+					index: 79,
+					length: 8,
 				}, {
 					tag: "#sample-tag",
 					fullMatch: " #sample-tag",
+					index: 87,
+					length: 12,
 				}, {
 					tag: "#sample-4",
 					fullMatch: " #sample-4",
+					index: 156,
+					length: 10,
 				}, {
 					tag: "#sample-3",
 					fullMatch: "#sample-3",
+					index: 168,
+					length: 9,
 				}, {
 					tag: "#1stunna",
 					fullMatch: " #1stunna",
+					index: 503,
+					length: 9,
 				}]
 			};
 			assert.deepEqual(macros, expected);

@@ -51,4 +51,6 @@ export interface ParsedCodeBlock {
 export interface ParsedTag {
 	tag: string;
 	fullMatch: string;
+	index: number;
+	length: number;
 }

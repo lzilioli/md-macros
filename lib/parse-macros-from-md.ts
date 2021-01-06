@@ -216,14 +216,18 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	while(tagsMatch) {
 		const tagText: string = tagsMatch[1];
 		let fullMatch: string = tagsMatch[0];
+		let index: number = tagsMatch.index;
 		if (fullMatch.startsWith('\n')) {
 			fullMatch = fullMatch.substr(1);
+			index++;
 		}
 		const isNumericalTag: boolean = /^#\d+$/gms.test(tagText);
 		if (!isNumericalTag) {
 			tags.push({
 				tag: tagText,
 				fullMatch,
+				index,
+				length: fullMatch.length
 			});
 		}
 		tagsMatch = tagRegex.exec(md);
