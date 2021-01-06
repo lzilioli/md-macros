@@ -437,24 +437,16 @@ These should get excluded:
 				codeBlocks: [],
 				tags: [{
 					tag: "#sample",
-					fullMatch: "#sample, ",
-					index: 79,
-					length: 7,
+					fullMatch: "#sample,",
 				}, {
 					tag: "#sample-tag",
-					fullMatch: "#sample-tag",
-					index: 88,
-					length: 11,
+					fullMatch: " #sample-tag",
 				}, {
 					tag: "#sample-4",
-					fullMatch: "#sample-4",
-					index: 157,
-					length: 9,
+					fullMatch: " #sample-4",
 				}, {
 					tag: "#sample-3",
 					fullMatch: "#sample-3",
-					index: 168,
-					length: 9,
 				}]
 			};
 			assert.deepEqual(macros, expected);

@@ -16,7 +16,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const codeBlocksRegex: RegExp = /(`{1,3}.+?`{1,3})/gms;
-	const tagRegex: RegExp = /(?<!\])(#[^\s,#]+),? ?/gms;
+	const tagRegex: RegExp = /\s(#[^\s,#)]+),?/gms;
 
 	const codeBlocks: ParsedCodeBlock[] = [];
 	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
@@ -207,16 +207,14 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
 		const tagText: string = tagsMatch[1];
-		// we skip over tags ending with ). These are anchor-style links that
-		// were wrongly matched by our tagRegex
-		if (!tagText.endsWith(')')) {
-			tags.push({
-				index: tagsMatch.index,
-				length: tagText.length,
-				tag: tagText,
-				fullMatch: tagsMatch[0],
-			});
+		let fullMatch: string = tagsMatch[0];
+		if (fullMatch.startsWith('\n')) {
+			fullMatch = fullMatch.substr(1);
 		}
+		tags.push({
+			tag: tagText,
+			fullMatch,
+		});
 		tagsMatch = tagRegex.exec(md);
 	}
 

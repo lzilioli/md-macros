@@ -151,8 +151,6 @@ export interface ParsedCodeBlock {
 }
 
 export interface ParsedTag {
-	index: number;
-	length: number;
 	tag: string;
 	fullMatch: string;
 }
