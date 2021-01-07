@@ -449,7 +449,7 @@ These should get excluded:
 [macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
 [macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
 [Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)
-Hello this is the #1 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna`;
+Hello this is the #1 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna but not #1: test`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [{

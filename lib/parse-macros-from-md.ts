@@ -214,7 +214,10 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const tags: ParsedTag[] = [];
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
-		const tagText: string = tagsMatch[1];
+		let tagText: string = tagsMatch[1];
+		if (tagText.endsWith(':')) {
+			tagText = tagText.substr(0, tagText.length - 1);
+		}
 		let fullMatch: string = tagsMatch[0];
 		let index: number = tagsMatch.index;
 		if (fullMatch.startsWith('\n')) {
