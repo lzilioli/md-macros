@@ -19,22 +19,26 @@ interface WalkerEvent {
 }
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
-	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
-	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
-	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
-	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
-	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
-	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
-	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
-
+	// The things we are parsing out of the file
 	const codeBlocks: ParsedCodeBlock[] = [];
+	const custom: Macro[] = [];
+	const img: ParsedImage[] = [];
+	const links: ParsedLink[] = [];
+	const references: ParsedReferences = {};
+	const tags: ParsedTag[] = [];
+
+	// Markdown parser which will help us walk the tree
 	const reader: commonmark.Parser = new commonmark.Parser();
 	const parsed: commonmark.Node = reader.parse(md);
 	const walker: NodeWalker = parsed.walker();
+
+	// Variables used while walking the tree
 	let event: WalkerEvent | null;
 	let node: commonmark.Node;
 	let areWeInCodeBlock: boolean = false;
 	let index: number = 0;
+
+	// https://github.com/commonmark/commonmark.js#usage
 	while((event = walker.next())) {
 		node = event.node;
 		if (typeof node.literal === 'string') {
@@ -78,7 +82,20 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		}
 	}
 
-	const custom: Macro[] = [];
+	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
+	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
+	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
+	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
+	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
+	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
+	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
+
+	// commonmark was added after this repo was created.
+	// the below parsing code was written pre-commonmark integration
+	// and thus uses regex instead of walking logic
+	// can be refactored and integrated into the tree walking logic
+	// at a later date
+
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
 	while (macroMatch) {
 		const macroText: string = macroMatch[1].trim();
@@ -118,8 +135,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		macroMatch = macroRegex.exec(md);
 	}
 
-	const img: ParsedImage[] = [];
-	const links: ParsedLink[] = [];
 	let imageOrLinkMatch: RegExpExecArray = inlineImgOrLinkRegex.exec(md);
 	while (imageOrLinkMatch) {
 		const fullMatch: string = imageOrLinkMatch[0].trim();
@@ -170,7 +185,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		imageOrLinkMatch = inlineImgOrLinkRegex.exec(md);
 	}
 
-	const references: ParsedReferences = {};
 	let referencesMatch: RegExpExecArray = referenceValsRegex.exec(md);
 	while (referencesMatch) {
 		const fullMatch: string = referencesMatch[0].trim();
@@ -251,7 +265,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		selfReferenceMatch = selfReferenceRegex.exec(md);
 	}
 
-	const tags: ParsedTag[] = [];
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
 		// regex has 2 groups, one for start of string, another for preceded by
