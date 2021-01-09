@@ -229,7 +229,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			index++;
 		}
 		const isNumericalTag: boolean = /^#\d+$/gms.test(tagText);
-		if (!isNumericalTag) {
+		const isWithinCodeBlocks: boolean = isIndexWithinCodeBlocks(index, codeBlocks);
+		if (!isNumericalTag && !isWithinCodeBlocks) {
 			tags.push({
 				tag: tagText,
 				fullMatch,
