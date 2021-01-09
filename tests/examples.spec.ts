@@ -40,9 +40,24 @@ export async function test(): Promise<void> {
                                 fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
                             }],
                             references: {},
-                            links: [],
-                            codeBlocks: [],
-                            tags: []
+                            links: [{
+                                altText: 'Link',
+                                fullMatch: '[Link](/home)',
+                                href: '/home',
+                                isReferenceStyle: false,
+                                title: "",
+                            }],
+                            codeBlocks: [{
+                                content: '`code`',
+                                index: 26,
+                                length: 6
+                            }],
+                            tags: [{
+                                fullMatch: ' #tag',
+                                index: 6,
+                                length: 5,
+                                tag: '#tag'
+                            }]
                         }]
                     ]
                 );
