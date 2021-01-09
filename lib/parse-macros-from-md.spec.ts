@@ -75,8 +75,8 @@ export async function test(): Promise<void> {
 			const macro0Text: string = `![alt text](www.example.com/example.png "Title Text")`;
 			const macro1Text: string = `![alt text2](www.example.com/example.png "Title Text2")`;
 			const md: string = `
-				test string ${macro0Text}
-				test string ${macro1Text}
+test string ${macro0Text}
+test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -106,8 +106,8 @@ export async function test(): Promise<void> {
 			const macro0Text: string = `![](www.example.com/example.png "Title Text")`;
 			const macro1Text: string = `![alt text2](www.example.com/example.png)`;
 			const md: string = `
-				test string ${macro0Text}
-				test string ${macro1Text}
+test string ${macro0Text}
+test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -139,8 +139,8 @@ export async function test(): Promise<void> {
 				url="test1"
 			]]`;
 			const md: string = `
-				test string ${macro0Text}
-				test string ${macro1Text}
+test string ${macro0Text}
+test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -378,23 +378,18 @@ if (!_.isArray(results)) {
 				},
 				{
 					index: 30,
-					length: 16,
-					content: "```\nfuck all\n```"
+					length: 17,
+					content: "```\nfuck all\n\n```"
 				},
 				{
-					index: 43,
-					length: 43,
-					content: "```\n\n\nThis is the offending code snippet: `"
-				},
-				{
-					index: 119,
-					length: 42,
-					content: "```\n\nThis is an offending code block:\n\n```"
+					index: 85,
+					length: 37,
+					content: "`queryResults[<array index>].address`"
 				},
 				{
 					index: 158,
-					length: 58,
-					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```"
+					length: 59,
+					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n\n```"
 				}],
 				tags: []
 			};
@@ -402,9 +397,7 @@ if (!_.isArray(results)) {
 		});
 
 		it('properly parses back-to-back code blocks', () => {
-			const md: string = `
-\`some-code\`\`some-more-code\`
-`;
+			const md: string = '\n`some-code``some-more-code`';
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
@@ -560,6 +553,34 @@ but not #1: test but #what. is cool but should remove the period.`;
 				links: [],
 				codeBlocks: [],
 				tags: []
+			};
+			assert.deepEqual(macros.tags, expected.tags);
+		});
+
+		it('BUG FIX: code blocks dont throw off tags', () => {
+			const md: string = `---
+title: Privacy Policy - _______________
+thumbnail:
+  icon: lock
+tags:
+    - privacy
+---
+#privacy
+
+1. \`CODE_BLOCK\` ____ \`ANOTHER_ONE\``;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+				codeBlocks: [],
+				tags: [{
+					tag: '#privacy',
+					fullMatch: '#privacy',
+					index: 92,
+					length: 8
+				}]
 			};
 			assert.deepEqual(macros.tags, expected.tags);
 		});

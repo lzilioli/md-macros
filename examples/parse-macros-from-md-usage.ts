@@ -2,7 +2,7 @@ import {parseMacrosFromMd, ParsedMacros} from '@lzilioli/md-macros';
 
 export async function parseMacrosFromMdUsageExample(): Promise<void> {
     const md: string = `
-        Hello [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
+Hello [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
     `;
 
     const macros: ParsedMacros = parseMacrosFromMd(md);

@@ -1,11 +1,21 @@
 import {some} from 'lodash';
 import cheerio from 'cheerio';
+import * as commonmark from 'commonmark';
 import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag } from '@lib/typedefs';
 
 function isIndexWithinCodeBlocks(index: number, codeBlocks: ParsedCodeBlock[]): boolean {
 	return some(codeBlocks, (codeBlock: ParsedCodeBlock): boolean => {
-		return index >= codeBlock.index || index <= codeBlock.index + codeBlock.length;
+		return index >= codeBlock.index && index <= codeBlock.index + codeBlock.length;
 	});
+}
+
+interface NodeWalker {
+	next: () => WalkerEvent;
+}
+
+interface WalkerEvent {
+	entering: boolean;
+	node: commonmark.Node;
 }
 
 export function parseMacrosFromMd(md: string): ParsedMacros {
@@ -15,27 +25,57 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
-	const codeBlocksRegex: RegExp = /((?:`{1}|`{3})[^`]+?(?:`{1}|`{3}))/gms;
 	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
 
 	const codeBlocks: ParsedCodeBlock[] = [];
-	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
-	while(codeBlockMatch) {
-		let codeBlockText: string = codeBlockMatch[0];
-		let index: number = codeBlockMatch.index;
-		if (codeBlockText.startsWith('`\n') && !codeBlockText.startsWith('```\n')) {
-			index -= 2;
-			codeBlockText = codeBlockText.replace('`\n', '```\n');
+	const reader: commonmark.Parser = new commonmark.Parser();
+	const parsed: commonmark.Node = reader.parse(md);
+	const walker: NodeWalker = parsed.walker();
+	let event: WalkerEvent | null;
+	let node: commonmark.Node;
+	let areWeInCodeBlock: boolean = false;
+	let index: number = 0;
+	while((event = walker.next())) {
+		node = event.node;
+		if (typeof node.literal === 'string') {
+			index = md.indexOf(node.literal, index);
 		}
-		if (codeBlockText.endsWith('\n`') && !codeBlockText.endsWith('\n```')) {
-			codeBlockText = codeBlockText.replace('\n`', '\n```');
+		if (node.type === 'code_block' || node.type === 'code') {
+			areWeInCodeBlock = event.entering;
+		} else {
+			areWeInCodeBlock = false;
 		}
-		codeBlocks.push({
-			index,
-			length: codeBlockText.length,
-			content: codeBlockText
-		});
-		codeBlockMatch = codeBlocksRegex.exec(md);
+		if (areWeInCodeBlock) {
+			let codeBlockText: string = node.literal;
+			if (node.type === 'code') {
+				// There is a bug with back-to-back code blocks getting
+				// parsed as a single code block. e.g. `code1``code2`.
+				// we correct for that here, since md-macros explicitly
+				// supports this as 2 code blocks
+				if (codeBlockText.indexOf('``') !== -1) {
+					const splitText: string[] = codeBlockText.split('``');
+					const tmpCodeBlockText: string = `\`${splitText[0]}\``;
+					index--;
+					codeBlocks.push({
+						index,
+						length: tmpCodeBlockText.length,
+						content: tmpCodeBlockText
+					});
+					index += (tmpCodeBlockText.length + 1);
+					codeBlockText = splitText[1];
+				}
+				codeBlockText = `\`${codeBlockText}\``;
+				index -= 1;
+			} else {
+				codeBlockText = `\`\`\`\n${codeBlockText}\n\`\`\``
+				index -= 4;
+			}
+			codeBlocks.push({
+				index,
+				length: codeBlockText.length,
+				content: codeBlockText
+			});
+		}
 	}
 
 	const custom: Macro[] = [];

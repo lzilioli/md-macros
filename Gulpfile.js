@@ -76,6 +76,7 @@ gulp.task('todo', () => {
 		'**/*.js',
 		'**/*.ts',
 		'!node_modules/**',
+		'!build/**',
 		'!dist/**',
 	])
 	.pipe(todo())

@@ -169,8 +169,6 @@ Hello
 
 -   [A heading](#a-heading)
 -   [Another One!](#another-one)`;
-			console.log(`"${result}"`)
-			console.log(`"${expected}"`)
 			assert.strictEqual(
 				result,
 				expected
