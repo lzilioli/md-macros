@@ -52,10 +52,20 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		if (areWeInCodeBlock) {
 			let codeBlockText: string = node.literal;
 			if (node.type === 'code') {
-				// There is a bug with back-to-back code blocks getting
-				// parsed as a single code block. e.g. `code1``code2`.
-				// we correct for that here, since md-macros explicitly
-				// supports this as 2 code blocks
+				// There is a discrepancy between the commonmark spec/behavior
+				// and the explicit spec of md-macros. The following snippet:
+				// 		`code1``code2`
+				// is parsed as a single code node by commonmark, with value
+				//		code1``code2`
+				// md-macros explitily tests for this case, and wants to treat
+				// it as two distinct code blocks:
+				// 		1. `code1`
+				// 		2. `code2`
+				// If the following if check passes, this means we have
+				// encountered the aforementioned discrepancy. Inside of the
+				// if statement, we take the single code block as spit out
+				// by commonmark, and map it to two distinct codeblocks within
+				// our codeBlocks array.
 				if (codeBlockText.indexOf('``') !== -1) {
 					const splitText: string[] = codeBlockText.split('``');
 					const tmpCodeBlockText: string = `\`${splitText[0]}\``;
@@ -90,11 +100,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
 
-	// commonmark was added after this repo was created.
-	// the below parsing code was written pre-commonmark integration
-	// and thus uses regex instead of walking logic
-	// can be refactored and integrated into the tree walking logic
-	// at a later date
+	// commonmark was added after this repo was created. At present, we only use
+	// the commonmark walker for parsing code blocks out of the markdown string.
+	// We did so above, before declaring the regex variables.
+	// Below this comment, we parse remaining macros out of the markdown
+	// the old fashioned way: with regex.
+	//
+	// When fixing bugs related to entities being parsed using regex, try to
+	// factor their parsing into the tree walk above. In most cases, switching
+	// to the commonmark parser will likely be the only code change that is
+	// necessary.
 
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
 	while (macroMatch) {
