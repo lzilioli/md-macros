@@ -560,6 +560,28 @@ but not #1: test but #what. is cool but should remove the period.`;
 			assert.deepEqual(macros, expected);
 		});
 
+		it('skips over tags within blockquotes', () => {
+			const md: string = `# Hello
+
+>	#header {
+>		// Other styling for header
+>		margin-left: 10px;
+>		@include respond-to(mobile) { margin-left: 0px; }
+>	}
+`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+				codeBlocks: [],
+				quotes: [],
+				tags: []
+			};
+			assert.deepEqual(macros.tags, expected.tags);
+		});
+
 		it('skips over tags within code blocks', () => {
 			const md: string = `# Hello
 \`\`\`css
