@@ -449,7 +449,7 @@ These should get excluded:
 [macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
 [macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
 [Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)
-Hello this is the #1 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna
+Hello this is the #3 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna
 but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -518,6 +518,25 @@ but not #1: test but #what. is cool but should remove the period.`;
 					fullMatch: " #what",
 					index: 533,
 					length: 6,
+				}]
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('parses a sole tag from a string', () => {
+			const md: string = `#what`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				custom: [],
+				img: [],
+				references: {},
+				links: [],
+				codeBlocks: [],
+				tags: [{
+					tag: "#what",
+					fullMatch: "#what",
+					index: 0,
+					length: 5,
 				}]
 			};
 			assert.deepEqual(macros, expected);

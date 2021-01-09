@@ -16,7 +16,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const codeBlocksRegex: RegExp = /((?:`{1}|`{3})[^`]+?(?:`{1}|`{3}))/gms;
-	const tagRegex: RegExp = /\s(#[^\s,#)]+),?/gms;
+	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
 
 	const codeBlocks: ParsedCodeBlock[] = [];
 	let codeBlockMatch: RegExpExecArray = codeBlocksRegex.exec(md);
@@ -214,7 +214,10 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const tags: ParsedTag[] = [];
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
-		let tagText: string = tagsMatch[1];
+		// regex has 2 groups, one for start of string, another for preceded by
+		// white space. fall back to the latter match if the former didnt contain
+		// anything
+		let tagText: string = tagsMatch[1] || tagsMatch[2];
 		let fullMatch: string = tagsMatch[0];
 		if (tagText.endsWith(':') || tagText.endsWith('.')) {
 			tagText = tagText.substr(0, tagText.length - 1);
