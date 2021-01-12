@@ -373,27 +373,32 @@ if (!_.isArray(results)) {
 				codeBlocks: [{
 					index: 1,
 					length: 11,
-					content: "`some-code`"
+					content: "`some-code`",
+					type: 'inline'
 				},
 				{
 					index: 12,
 					length: 16,
-					content: "`some-more-code`"
+					content: "`some-more-code`",
+					type: 'inline'
 				},
 				{
 					index: 30,
 					length: 12,
-					content: "```\nUGH!\n```"
+					content: "```\nUGH!\n```",
+					type: 'block'
 				},
 				{
 					index: 81,
 					length: 37,
-					content: "`queryResults[<array index>].address`"
+					content: "`queryResults[<array index>].address`",
+					type: 'inline'
 				},
 				{
 					index: 154,
 					length: 58,
-					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```"
+					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```",
+					type: 'block'
 				}],
 				tags: []
 			};
@@ -410,10 +415,12 @@ if (!_.isArray(results)) {
 				links: [],
 				codeBlocks: [{
 					content: '`some-code`',
+					type: 'inline',
 					index: 1,
 					length: 11
 				}, {
 					content: '`some-more-code`',
+					type: 'inline',
 					index: 12,
 					length: 16
 				}],

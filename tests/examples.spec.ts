@@ -49,6 +49,7 @@ export async function test(): Promise<void> {
                             }],
                             codeBlocks: [{
                                 content: '`code`',
+                                type: 'inline',
                                 index: 26,
                                 length: 6
                             }],

@@ -50,6 +50,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			areWeInCodeBlock = false;
 		}
 		if (areWeInCodeBlock) {
+			const type: 'inline' | 'block' = node.type === 'code' ? 'inline' : 'block';
 			let codeBlockText: string = node.literal;
 			if (node.type === 'code') {
 				// There is a discrepancy between the commonmark spec/behavior
@@ -72,6 +73,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 					index--;
 					codeBlocks.push({
 						index,
+						type,
 						length: tmpCodeBlockText.length,
 						content: tmpCodeBlockText
 					});
@@ -86,6 +88,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			}
 			codeBlocks.push({
 				index,
+				type,
 				length: codeBlockText.length,
 				content: codeBlockText
 			});

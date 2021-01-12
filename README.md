@@ -148,6 +148,7 @@ export interface ParsedCodeBlock {
 	index: number;
 	length: number;
 	content: string;
+	type: 'inline' | 'block';
 }
 
 export interface ParsedTag {
