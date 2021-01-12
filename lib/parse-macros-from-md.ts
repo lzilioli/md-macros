@@ -1,11 +1,12 @@
 import {some} from 'lodash';
 import cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
-import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag, ParsedBlockQuote, ParsedBlock } from '@lib/typedefs';
+import { CodeBlockExtractor, getCodeBlockExtractor, ExtractorResults, BlockQuoteExtractor, getBlockQuoteExtractor } from './static-tree-helpers';
 
-function isIndexWithinCodeBlocks(index: number, codeBlocks: ParsedCodeBlock[]): boolean {
-	return some(codeBlocks, (codeBlock: ParsedCodeBlock): boolean => {
-		return index >= codeBlock.index && index <= codeBlock.index + codeBlock.length;
+function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
+	return some(parsedBlocks, (block: (ParsedBlock)): boolean => {
+		return index >= block.index && index <= block.index + block.length;
 	});
 }
 
@@ -13,7 +14,7 @@ interface NodeWalker {
 	next: () => WalkerEvent;
 }
 
-interface WalkerEvent {
+export interface WalkerEvent {
 	entering: boolean;
 	node: commonmark.Node;
 }
@@ -21,6 +22,7 @@ interface WalkerEvent {
 export function parseMacrosFromMd(md: string): ParsedMacros {
 	// The things we are parsing out of the file
 	const codeBlocks: ParsedCodeBlock[] = [];
+	const blockQuotes: ParsedBlockQuote[] = [];
 	const custom: Macro[] = [];
 	const img: ParsedImage[] = [];
 	const links: ParsedLink[] = [];
@@ -35,8 +37,10 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	// Variables used while walking the tree
 	let event: WalkerEvent | null;
 	let node: commonmark.Node;
-	let areWeInCodeBlock: boolean = false;
 	let index: number = 0;
+
+	const codeBlockExtractor: CodeBlockExtractor = getCodeBlockExtractor();
+	const blockQuoteExtractor: BlockQuoteExtractor = getBlockQuoteExtractor();
 
 	// https://github.com/commonmark/commonmark.js#usage
 	while((event = walker.next())) {
@@ -44,55 +48,16 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		if (typeof node.literal === 'string') {
 			index = md.indexOf(node.literal, index);
 		}
-		if (node.type === 'code_block' || node.type === 'code') {
-			areWeInCodeBlock = event.entering;
-		} else {
-			areWeInCodeBlock = false;
-		}
-		if (areWeInCodeBlock) {
-			const type: 'inline' | 'block' = node.type === 'code' ? 'inline' : 'block';
-			let codeBlockText: string = node.literal;
-			if (node.type === 'code') {
-				// There is a discrepancy between the commonmark spec/behavior
-				// and the explicit spec of md-macros. The following snippet:
-				// 		`code1``code2`
-				// is parsed as a single code node by commonmark, with value
-				//		code1``code2`
-				// md-macros explitily tests for this case, and wants to treat
-				// it as two distinct code blocks:
-				// 		1. `code1`
-				// 		2. `code2`
-				// If the following if check passes, this means we have
-				// encountered the aforementioned discrepancy. Inside of the
-				// if statement, we take the single code block as spit out
-				// by commonmark, and map it to two distinct codeblocks within
-				// our codeBlocks array.
-				if (codeBlockText.indexOf('``') !== -1) {
-					const splitText: string[] = codeBlockText.split('``');
-					const tmpCodeBlockText: string = `\`${splitText[0]}\``;
-					index--;
-					codeBlocks.push({
-						index,
-						type,
-						length: tmpCodeBlockText.length,
-						content: tmpCodeBlockText
-					});
-					index += (tmpCodeBlockText.length + 1);
-					codeBlockText = splitText[1];
-				}
-				codeBlockText = `\`${codeBlockText}\``;
-				index -= 1;
-			} else {
-				codeBlockText = `\`\`\`\n${codeBlockText}\`\`\``
-				index -= 4;
-			}
-			codeBlocks.push({
-				index,
-				type,
-				length: codeBlockText.length,
-				content: codeBlockText
-			});
-		}
+		const codeBlockResults: ExtractorResults<ParsedCodeBlock> = codeBlockExtractor(index, event);
+		index = codeBlockResults.index;
+		codeBlockResults.items.forEach((block: ParsedCodeBlock) => {
+			codeBlocks.push(block);
+		});
+		const blockQuoteResults: ExtractorResults<ParsedBlockQuote> = blockQuoteExtractor(index, event);
+		index = blockQuoteResults.index;
+		blockQuoteResults.items.forEach((block: ParsedBlockQuote) => {
+			blockQuotes.push(block);
+		});
 	}
 
 	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
@@ -268,7 +233,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				referenceKey: refKey
 			});
 		} else if (fullMatch !== '[ ]' && fullMatch.toLowerCase() !== '[x]') {
-			const isWithinCodeBlocks: boolean = isIndexWithinCodeBlocks(selfReferenceMatch.index, codeBlocks);
+			const isWithinCodeBlocks: boolean = isIndexWithinParsedBlocks(selfReferenceMatch.index, codeBlocks);
 			if (!isWithinCodeBlocks) {
 				links.push({
 					href: (references[refKey] || {}).value,
@@ -300,8 +265,11 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			index++;
 		}
 		const isNumericalTag: boolean = /^#\d+$/gms.test(tagText);
-		const isWithinCodeBlocks: boolean = isIndexWithinCodeBlocks(index, codeBlocks);
-		if (!isNumericalTag && !isWithinCodeBlocks) {
+		const isWithinBlocks: boolean = isIndexWithinParsedBlocks(index, [
+			...codeBlocks,
+			...blockQuotes
+		]);
+		if (!isNumericalTag && !isWithinBlocks) {
 			tags.push({
 				tag: tagText,
 				fullMatch,
@@ -318,6 +286,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		references,
 		links,
 		codeBlocks,
-		tags
+		tags,
+		quotes: blockQuotes
 	};
 }

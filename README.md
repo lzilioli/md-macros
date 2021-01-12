@@ -116,6 +116,7 @@ export interface ParsedMacros {
 	links: ParsedLink[];
 	codeBlocks: ParsedCodeBlock[];
 	tags: ParsedTag[];
+	quotes: ParsedBlockQuote[];
 }
 
 export interface ParsedImage {
@@ -144,18 +145,23 @@ export interface ParsedReferences {
 	};
 }
 
-export interface ParsedCodeBlock {
-	index: number;
-	length: number;
-	content: string;
-	type: 'inline' | 'block';
-}
-
 export interface ParsedTag {
 	tag: string;
 	fullMatch: string;
 	index: number;
 	length: number;
+}
+
+export interface ParsedBlock {
+	index: number;
+	length: number;
+	content: string;
+}
+
+export type ParsedBlockQuote = ParsedBlock;
+
+export type ParsedCodeBlock = ParsedBlock & {
+	type: 'inline' | 'block';
 }
 ```
 

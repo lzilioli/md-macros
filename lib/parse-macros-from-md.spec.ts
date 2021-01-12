@@ -1,6 +1,6 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
-import { ParsedCodeBlock, ParsedMacros } from "./entries";
+import { ParsedBlock, ParsedCodeBlock, ParsedMacros } from "./entries";
 
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
@@ -81,6 +81,7 @@ test string ${macro1Text}
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [{
 					isReferenceStyle: false,
 					altText: "alt text",
@@ -112,6 +113,7 @@ test string ${macro1Text}
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [{
 					isReferenceStyle: false,
 					altText: "",
@@ -149,6 +151,7 @@ test string ${macro1Text}
 					args: {url: 'test1'},
 					fullMatch: macro1Text,
 				}],
+				quotes: [],
 				img: [{
 					isReferenceStyle: false,
 					altText: "alt text",
@@ -175,6 +178,7 @@ Thank you for attending my talk.
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -192,6 +196,7 @@ Thank you for attending my talk.
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {
 					'arbitrary case-insensitive reference text': {
@@ -279,6 +284,7 @@ Thank you for attending my talk.
 					src: "www.example4.com",
 					title: "",
 				}],
+				quotes: [],
 				references: {
 					wat: {
 						value: 'www.example3.com',
@@ -367,6 +373,7 @@ if (!_.isArray(results)) {
 			});
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -386,7 +393,7 @@ if (!_.isArray(results)) {
 					index: 30,
 					length: 12,
 					content: "```\nUGH!\n```",
-					type: 'block'
+					type: 'block',
 				},
 				{
 					index: 81,
@@ -398,7 +405,7 @@ if (!_.isArray(results)) {
 					index: 154,
 					length: 58,
 					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```",
-					type: 'block'
+					type: 'block',
 				}],
 				tags: []
 			};
@@ -410,6 +417,7 @@ if (!_.isArray(results)) {
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -474,6 +482,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 					fullMatch: "[[getLink test=\"macro-hash\"]]",
 					name: "getLink",
 				}],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [{
@@ -536,6 +545,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -563,6 +573,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -586,6 +597,7 @@ tags:
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				custom: [],
+				quotes: [],
 				img: [],
 				references: {},
 				links: [],
@@ -600,4 +612,49 @@ tags:
 			assert.deepEqual(macros.tags, expected.tags);
 		});
 	} );
+
+	it('extracts block quotes', () => {
+		const md: string = `Hello what did you say? I remember.
+
+> This is what you said.
+> This is why you said it.
+> You said it with a #tag but we didnt listen.
+
+Ahh. Thats right.
+
+> And then I said this.
+> And you said that.
+
+`;
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		[
+			...macros.codeBlocks,
+			...macros.codeBlocks,
+		]
+		.forEach((block: ParsedBlock): void => {
+			// Check that all of the code block ranges are correct
+			assert.strictEqual(block.content, md.substr(block.index, block.length));
+		});
+		const expected: ParsedMacros = {
+			custom: [],
+			quotes: [  {
+				content: '> This is what you said.\n' +
+					'> This is why you said it.\n' +
+					'> You said it with a #tag but we didnt listen.\n',
+				index: 39,
+				length: 99
+			}, {
+				content: '> And then I said this.\n> And you said that.\n',
+				index: 158,
+				length: 45
+			}],
+			img: [],
+			references: {},
+			links: [],
+			codeBlocks: [],
+			tags: []
+		};
+		assert.deepEqual(macros.quotes, expected.quotes);
+		assert.deepEqual(macros.tags, expected.tags);
+	});
 }
