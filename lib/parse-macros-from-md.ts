@@ -81,7 +81,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				codeBlockText = `\`${codeBlockText}\``;
 				index -= 1;
 			} else {
-				codeBlockText = `\`\`\`\n${codeBlockText}\n\`\`\``
+				codeBlockText = `\`\`\`\n${codeBlockText}\`\`\``
 				index -= 4;
 			}
 			codeBlocks.push({

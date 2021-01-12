@@ -1,6 +1,6 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
-import { ParsedMacros } from "./entries";
+import { ParsedCodeBlock, ParsedMacros } from "./entries";
 
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
@@ -346,7 +346,7 @@ Thank you for attending my talk.
 \`some-code\`\`some-more-code\`
 
 \`\`\`
-fuck all
+UGH!
 \`\`\`
 
 
@@ -361,6 +361,10 @@ if (!_.isArray(results)) {
 \`\`\`
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
+			macros.codeBlocks.forEach((codeBlock: ParsedCodeBlock): void => {
+				// Check that all of the code block ranges are correct
+				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
+			});
 			const expected: ParsedMacros = {
 				custom: [],
 				img: [],
@@ -378,18 +382,18 @@ if (!_.isArray(results)) {
 				},
 				{
 					index: 30,
-					length: 17,
-					content: "```\nfuck all\n\n```"
+					length: 12,
+					content: "```\nUGH!\n```"
 				},
 				{
-					index: 85,
+					index: 81,
 					length: 37,
 					content: "`queryResults[<array index>].address`"
 				},
 				{
-					index: 158,
-					length: 59,
-					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n\n```"
+					index: 154,
+					length: 58,
+					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```"
 				}],
 				tags: []
 			};
@@ -415,6 +419,10 @@ if (!_.isArray(results)) {
 				}],
 				tags: []
 			};
+			macros.codeBlocks.forEach((codeBlock: ParsedCodeBlock): void => {
+				// Check that all of the ranges are correct
+				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
+			});
 			assert.deepEqual(macros, expected);
 		});
 
