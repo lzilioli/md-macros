@@ -146,7 +146,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		if (title.length && title.startsWith('"') && title.endsWith('"')) {
 			title = title.substr(1, title.length - 2);
 		} else if (title.length) {
-			console.log(title)
 			throw new Error(`image or link title should be wrapped in double quotes: ${title}`)
 		}
 		if (fullMatch.startsWith('!')) {
