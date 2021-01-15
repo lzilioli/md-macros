@@ -146,7 +146,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		if (title.length && title.startsWith('"') && title.endsWith('"')) {
 			title = title.substr(1, title.length - 2);
 		} else if (title.length) {
-			throw new Error(`Title should be wrapped in double quotes: ${title}`)
+			console.log(title)
+			throw new Error(`image or link title should be wrapped in double quotes: ${title}`)
 		}
 		if (fullMatch.startsWith('!')) {
 			img.push({
@@ -170,25 +171,32 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 
 	let referencesMatch: RegExpExecArray = referenceValsRegex.exec(md);
 	while (referencesMatch) {
-		const fullMatch: string = referencesMatch[0].trim();
-		const refKey: string = referencesMatch[1].trim();
-		const urlAndTitle: string = referencesMatch[2].trim();
-		const split: string[] = urlAndTitle.split(' ');
-		const value: string = split.shift();
-		let title: string = split.join(' ').trim();
-		if (title.length && title.startsWith('"') && title.endsWith('"')) {
-			title = title.substr(1, title.length - 2);
-		} else if (title.length) {
-			throw new Error(`Title should be wrapped in double quotes: ${title}`)
+		const isWithinCodeBlock: boolean = isIndexWithinParsedBlocks(referencesMatch.index, [
+			...codeBlocks,
+			...blockQuotes
+		]);
+		if (!isWithinCodeBlock) {
+			const fullMatch: string = referencesMatch[0].trim();
+			const refKey: string = referencesMatch[1].trim();
+			const urlAndTitle: string = referencesMatch[2].trim();
+			const split: string[] = urlAndTitle.split(' ');
+			const value: string = split.shift();
+			let title: string = split.join(' ').trim();
+			if (title.length && title.startsWith('"') && title.endsWith('"')) {
+				title = title.substr(1, title.length - 2);
+			} else if (title.length) {
+				console.log(title, referencesMatch.index)
+				throw new Error(`referenece title should be wrapped in double quotes: ${title}`)
+			}
+			if (references[refKey]) {
+				throw new Error(`duplicate reference key encountered ${refKey}`);
+			}
+			references[refKey] = {
+				value,
+				fullMatch,
+				title
+			};
 		}
-		if (references[refKey]) {
-			throw new Error(`duplicate reference key encountered ${refKey}`);
-		}
-		references[refKey] = {
-			value,
-			fullMatch,
-			title
-		};
 		referencesMatch = referenceValsRegex.exec(md);
 	}
 

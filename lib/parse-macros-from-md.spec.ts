@@ -657,4 +657,62 @@ Ahh. Thats right.
 		assert.deepEqual(macros.quotes, expected.quotes);
 		assert.deepEqual(macros.tags, expected.tags);
 	});
+
+	it('doesnt throw on this list', () => {
+		const md: string = `
+* Instead of \`{ foo: foo }\`, you can just do \`{ foo }\` – known as a _property value shorthand_
+* Computed property names, \`{ [prefix + 'Foo']: 'bar' }\`, where \`prefix: 'moz'\`, yields \`{ mozFoo: 'bar' }\`
+* You can’t combine computed property names and property value shorthands, \`{ [foo] }\` is invalid
+
+`;
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		[
+			...macros.codeBlocks,
+			...macros.codeBlocks,
+		]
+		.forEach((block: ParsedBlock): void => {
+			// Check that all of the code block ranges are correct
+			assert.strictEqual(block.content, md.substr(block.index, block.length));
+		});
+		const expected: ParsedMacros = {
+			custom: [],
+			quotes: [  ],
+			img: [],
+			references: {},
+			links: [],
+			codeBlocks: [{
+				content: "`{ foo: foo }`",
+				index: 14,
+				length: 14,
+				type: "inline",
+			}, {
+				content: "`{ foo }`",
+				index: 46,
+				length: 9,
+				type: "inline",
+			}, {
+				content: "`{ [prefix + 'Foo']: 'bar' }`",
+				index: 123,
+				length: 29,
+				type: "inline",
+			}, {
+				content: "`prefix: 'moz'`",
+				index: 160,
+				length: 15,
+				type: "inline",
+			}, {
+				content: "`{ mozFoo: 'bar' }`",
+				index: 184,
+				length: 19,
+				type: "inline",
+			}, {
+				content: "`{ [foo] }`",
+				index: 279,
+				length: 11,
+				type: "inline",
+			}],
+			tags: []
+		};
+		assert.deepEqual(macros, expected);
+	});
 }
