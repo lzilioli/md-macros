@@ -98,7 +98,7 @@ export function getBlockQuoteExtractor(): BlockQuoteExtractor {
 			codeBlockText = `> ${codeBlockText}\n`;
 			thisQuoteStart = thisQuote.length ? thisQuoteStart : index - 2;
 			thisQuote.push(codeBlockText);
-			index += 3;
+			index += codeBlockText.length;
 		}
 		return {
 			index,
