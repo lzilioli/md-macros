@@ -2,7 +2,7 @@ import {some} from 'lodash';
 import cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
 import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag, ParsedBlockQuote, ParsedBlock } from '@lib/typedefs';
-import { CodeBlockExtractor, getCodeBlockExtractor, ExtractorResults, BlockQuoteExtractor, getBlockQuoteExtractor } from './static-tree-helpers';
+import { CodeBlockExtractor, getCodeBlockExtractor, ExtractorResults } from './static-tree-helpers';
 
 function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
 	return some(parsedBlocks, (block: (ParsedBlock)): boolean => {
@@ -40,7 +40,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	let index: number = 0;
 
 	const codeBlockExtractor: CodeBlockExtractor = getCodeBlockExtractor();
-	const blockQuoteExtractor: BlockQuoteExtractor = getBlockQuoteExtractor();
 
 	// https://github.com/commonmark/commonmark.js#usage
 	while((event = walker.next())) {
@@ -52,11 +51,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		index = codeBlockResults.index;
 		codeBlockResults.items.forEach((block: ParsedCodeBlock) => {
 			codeBlocks.push(block);
-		});
-		const blockQuoteResults: ExtractorResults<ParsedBlockQuote> = blockQuoteExtractor(index, event);
-		index = blockQuoteResults.index;
-		blockQuoteResults.items.forEach((block: ParsedBlockQuote) => {
-			blockQuotes.push(block);
 		});
 	}
 
@@ -78,6 +72,35 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	// factor their parsing into the tree walk above. In most cases, switching
 	// to the commonmark parser will likely be the only code change that is
 	// necessary.
+
+	const splitMd: string[] = md.split('\n');
+	let blockIdx: number = 0;
+	let curBlockQuote: string[] = [];
+	let curBlockQuoteStart: number = -1;
+	splitMd.forEach((line: string): void => {
+		if (!line.startsWith('>')) {
+			if (curBlockQuoteStart === -1) {
+				blockIdx += line.length + 1;
+				return;
+			}
+			curBlockQuote.push(line);
+			const content: string = curBlockQuote.join('\n');
+			blockQuotes.push({
+				index: curBlockQuoteStart,
+				length: content.length,
+				content
+			});
+			curBlockQuote = [];
+			curBlockQuoteStart = -1;
+			blockIdx += line.length + 1;
+			return;
+		}
+		if (curBlockQuoteStart === -1) {
+			curBlockQuoteStart = blockIdx;
+		}
+		curBlockQuote.push(line);
+		blockIdx += line.length + 1;
+	});
 
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
 	while (macroMatch) {
@@ -184,7 +207,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			if (title.length && title.startsWith('"') && title.endsWith('"')) {
 				title = title.substr(1, title.length - 2);
 			} else if (title.length) {
-				console.log(title, referencesMatch.index)
 				throw new Error(`referenece title should be wrapped in double quotes: ${title}`)
 			}
 			if (references[refKey]) {

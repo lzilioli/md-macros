@@ -564,9 +564,9 @@ but not #1: test but #what. is cool but should remove the period.`;
 			const md: string = `# Hello
 
 > #header {
-> // Other styling for header
-> margin-left: 10px;
-> @include respond-to(mobile) { margin-left: 0px; }
+> 	// Other styling for header
+> 	margin-left: 10px;
+> 	@include respond-to(mobile) { margin-left: 0px; }
 > }
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
@@ -579,23 +579,25 @@ but not #1: test but #what. is cool but should remove the period.`;
 				quotes: [
 					{
 						content: `> #header {
-> // Other styling for header
-> margin-left: 10px;
-> @include respond-to(mobile) { margin-left: 0px; }
+> 	// Other styling for header
+> 	margin-left: 10px;
+> 	@include respond-to(mobile) { margin-left: 0px; }
 > }
 `,
 						index: 9,
-						length: 119,
+						length: 122,
 					}
 				],
 				tags: []
 			};
-			// TODO this highlights a bug when content of block quote is indented
+			assert.deepEqual(macros, expected);
 			macros.quotes.forEach((codeBlock: ParsedCodeBlock): void => {
 				// Check that all of the code block ranges are correct
-				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
+				assert.strictEqual(
+					md.substr(codeBlock.index, codeBlock.length),
+					codeBlock.content,
+				);
 			});
-			assert.deepEqual(macros, expected);
 		});
 
 		it('skips over tags within code blocks', () => {
@@ -661,6 +663,7 @@ tags:
 Ahh. Thats right.
 
 > And then I said this.
+>
 > And you said that.
 
 `;
@@ -682,9 +685,9 @@ Ahh. Thats right.
 				index: 37,
 				length: 99
 			}, {
-				content: '> And then I said this.\n> And you said that.\n',
+				content: '> And then I said this.\n>\n> And you said that.\n',
 				index: 156,
-				length: 45
+				length: 47
 			}],
 			img: [],
 			references: {},

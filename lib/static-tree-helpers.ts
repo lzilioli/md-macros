@@ -10,7 +10,6 @@ export interface ExtractorResults<T> {
 }
 type Extractor<T> = (index: number, event: WalkerEvent) => ExtractorResults<T>;
 export type CodeBlockExtractor = Extractor<ParsedCodeBlock>;
-export type BlockQuoteExtractor = Extractor<ParsedBlockQuote>;
 
 export function getCodeBlockExtractor(): CodeBlockExtractor {
 	let areWeInCodeBlock: boolean = false;
@@ -69,40 +68,6 @@ export function getCodeBlockExtractor(): CodeBlockExtractor {
 		return {
 			index,
 			items: codeBlocks
-		};
-	};
-}
-
-export function getBlockQuoteExtractor(): BlockQuoteExtractor {
-	let areWeInBlockQuote: boolean = false;
-	let thisQuoteStart: number = null;
-	let thisQuote: string[] = [];
-	return (index: number, event: WalkerEvent): ExtractorResults<ParsedBlockQuote> => {
-		const node: commonmark.Node = event.node;
-		const blockQuotes: ParsedBlockQuote[] = [];
-		if (node.type === 'block_quote') {
-			areWeInBlockQuote = event.entering;
-			if (!event.entering) {
-				const quote: string = thisQuote.join('');
-				blockQuotes.push({
-					index: thisQuoteStart,
-					length: quote.length,
-					content: quote
-				});
-				thisQuoteStart = index - 2;
-				thisQuote = [];
-			}
-		}
-		if (areWeInBlockQuote && node.literal) {
-			let codeBlockText: string = node.literal || '';
-			codeBlockText = `> ${codeBlockText}\n`;
-			thisQuoteStart = thisQuote.length ? thisQuoteStart : index - 2;
-			thisQuote.push(codeBlockText);
-			index += codeBlockText.length;
-		}
-		return {
-			index,
-			items: blockQuotes
 		};
 	};
 }
