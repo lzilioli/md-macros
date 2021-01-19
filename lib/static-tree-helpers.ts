@@ -1,4 +1,4 @@
-import { ParsedBlockQuote, ParsedCodeBlock } from '@lib/typedefs';
+import { ParsedCodeBlock } from '@lib/typedefs';
 import * as commonmark from 'commonmark';
 import { WalkerEvent } from './parse-macros-from-md';
 
