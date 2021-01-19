@@ -563,11 +563,11 @@ but not #1: test but #what. is cool but should remove the period.`;
 		it('skips over tags within blockquotes', () => {
 			const md: string = `# Hello
 
->	#header {
->		// Other styling for header
->		margin-left: 10px;
->		@include respond-to(mobile) { margin-left: 0px; }
->	}
+> #header {
+> // Other styling for header
+> margin-left: 10px;
+> @include respond-to(mobile) { margin-left: 0px; }
+> }
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
@@ -576,10 +576,26 @@ but not #1: test but #what. is cool but should remove the period.`;
 				references: {},
 				links: [],
 				codeBlocks: [],
-				quotes: [],
+				quotes: [
+					{
+						content: `> #header {
+> // Other styling for header
+> margin-left: 10px;
+> @include respond-to(mobile) { margin-left: 0px; }
+> }
+`,
+						index: 9,
+						length: 119,
+					}
+				],
 				tags: []
 			};
-			assert.deepEqual(macros.tags, expected.tags);
+			// TODO this highlights a bug when content of block quote is indented
+			macros.quotes.forEach((codeBlock: ParsedCodeBlock): void => {
+				// Check that all of the code block ranges are correct
+				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
+			});
+			assert.deepEqual(macros, expected);
 		});
 
 		it('skips over tags within code blocks', () => {
@@ -651,7 +667,7 @@ Ahh. Thats right.
 		const macros: ParsedMacros = parseMacrosFromMd(md);
 		[
 			...macros.codeBlocks,
-			...macros.codeBlocks,
+			...macros.quotes,
 		]
 		.forEach((block: ParsedBlock): void => {
 			// Check that all of the code block ranges are correct
@@ -663,11 +679,11 @@ Ahh. Thats right.
 				content: '> This is what you said.\n' +
 					'> This is why you said it.\n' +
 					'> You said it with a #tag but we didnt listen.\n',
-				index: 39,
+				index: 37,
 				length: 99
 			}, {
 				content: '> And then I said this.\n> And you said that.\n',
-				index: 158,
+				index: 156,
 				length: 45
 			}],
 			img: [],
@@ -690,7 +706,7 @@ Ahh. Thats right.
 		const macros: ParsedMacros = parseMacrosFromMd(md);
 		[
 			...macros.codeBlocks,
-			...macros.codeBlocks,
+			...macros.quotes,
 		]
 		.forEach((block: ParsedBlock): void => {
 			// Check that all of the code block ranges are correct

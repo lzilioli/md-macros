@@ -1,5 +1,5 @@
-import * as commonmark from 'commonmark';
 import { ParsedBlockQuote, ParsedCodeBlock } from '@lib/typedefs';
+import * as commonmark from 'commonmark';
 import { WalkerEvent } from './parse-macros-from-md';
 
 // Markdownn parsing and tree walking helpers
@@ -89,14 +89,14 @@ export function getBlockQuoteExtractor(): BlockQuoteExtractor {
 					length: quote.length,
 					content: quote
 				});
-				thisQuoteStart = index;
+				thisQuoteStart = index - 2;
 				thisQuote = [];
 			}
 		}
 		if (areWeInBlockQuote && node.literal) {
 			let codeBlockText: string = node.literal || '';
 			codeBlockText = `> ${codeBlockText}\n`;
-			thisQuoteStart = thisQuote.length ? thisQuoteStart : index;
+			thisQuoteStart = thisQuote.length ? thisQuoteStart : index - 2;
 			thisQuote.push(codeBlockText);
 			index += 3;
 		}

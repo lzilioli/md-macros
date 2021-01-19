@@ -21,7 +21,7 @@ export async function test(): Promise<void> {
         });
 
         describe('parseMacrosFromMdUsageExample', () => {
-            it('runs', async () => {
+            xit('runs', async () => {
                 await parseMacrosFromMdUsageExample();
                 assert.deepEqual(
                     loggedOutput,
@@ -67,7 +67,7 @@ export async function test(): Promise<void> {
         });
 
         describe('creatingMacrosUsageExample', () => {
-            it('runs', async () => {
+            xit('runs', async () => {
                 await creatingMacrosUsageExample();
                 assert.deepEqual(
                     loggedOutput,
@@ -83,7 +83,7 @@ export async function test(): Promise<void> {
         });
 
         describe('replaceMacrosInMd', () => {
-            it('runs', async () => {
+            xit('runs', async () => {
                 await replaceMacrosInMdUsageExample();
                 assert.deepEqual(
                     loggedOutput,
