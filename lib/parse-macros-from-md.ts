@@ -298,7 +298,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			...codeBlocks,
 			...blockQuotes
 		]);
-		if (!isNumericalTag && !isWithinBlocks) {
+		if (!isNumericalTag && !isWithinBlocks && tagText !== '#') {
 			tags.push({
 				tag: tagText,
 				fullMatch,

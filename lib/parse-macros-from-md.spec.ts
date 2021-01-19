@@ -653,6 +653,23 @@ tags:
 		});
 	} );
 
+	it('BUG FIX: phone number label not parsed as a tag', () => {
+		const md: string = `This is a file
+
+I am providing a phone #: xxx-yyy-zzz`;
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		const expected: ParsedMacros = {
+			custom: [],
+			quotes: [],
+			img: [],
+			references: {},
+			links: [],
+			codeBlocks: [],
+			tags: []
+		};
+		assert.deepEqual(macros.tags, expected.tags);
+	});
+
 	it('extracts block quotes', () => {
 		const md: string = `Hello what did you say? I remember.
 
