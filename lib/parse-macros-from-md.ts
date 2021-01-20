@@ -1,7 +1,7 @@
 import {some} from 'lodash';
 import cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
-import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag, ParsedBlockQuote, ParsedBlock } from '@lib/typedefs';
+import { Macro, ParsedMacros, ParsedImage, ParsedReferences, ParsedLink, ParsedCodeBlock, ParsedTag, ParsedBlockQuote, ParsedBlock, ParsedTask } from '@lib/typedefs';
 import { CodeBlockExtractor, getCodeBlockExtractor, ExtractorResults } from './static-tree-helpers';
 
 function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
@@ -23,6 +23,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	// The things we are parsing out of the file
 	const codeBlocks: ParsedCodeBlock[] = [];
 	const blockQuotes: ParsedBlockQuote[] = [];
+	const tasks: ParsedTask[] = [];
 	const custom: Macro[] = [];
 	const img: ParsedImage[] = [];
 	const links: ParsedLink[] = [];
@@ -77,6 +78,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	let blockIdx: number = 0;
 	let curBlockQuote: string[] = [];
 	let curBlockQuoteStart: number = -1;
+	// Parse out block quotes
 	splitMd.forEach((line: string): void => {
 		if (!line.startsWith('>')) {
 			if (curBlockQuoteStart === -1) {
@@ -100,6 +102,28 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		}
 		curBlockQuote.push(line);
 		blockIdx += line.length + 1;
+	});
+
+	// Parse out tasks
+	let taskIdx: number = 0;
+	splitMd.forEach((line: string, lineNo: number): void => {
+		if (/^\s*?\d+?\. \[x? ?\].*?$|^\s*?- \[x? ?\].*?$/gi.test(line)) {
+			const completed: boolean = /\[X\]/i.test(line);
+			const match: RegExpExecArray = /^\s+/.exec(line.replace(/\t/g, '  '));
+			let indentLevel: number = 0;
+			if (match) {
+				indentLevel = match[0].length / 2;
+			}
+			tasks.push({
+				index: taskIdx,
+				length: line.length,
+				content: `${line}\n`,
+				line: lineNo,
+				completed,
+				indentLevel,
+			});
+		}
+		taskIdx += line.length + 1;
 	});
 
 	let macroMatch: RegExpExecArray = macroRegex.exec(md);
@@ -316,6 +340,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		links,
 		codeBlocks,
 		tags,
+		tasks,
 		quotes: blockQuotes
 	};
 }

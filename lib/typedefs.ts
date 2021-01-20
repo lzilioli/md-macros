@@ -15,6 +15,7 @@ export interface ParsedMacros {
 	codeBlocks: ParsedCodeBlock[];
 	tags: ParsedTag[];
 	quotes: ParsedBlockQuote[];
+	tasks: ParsedTask[];
 }
 
 export interface ParsedImage {
@@ -60,4 +61,10 @@ export type ParsedBlockQuote = ParsedBlock;
 
 export type ParsedCodeBlock = ParsedBlock & {
 	type: 'inline' | 'block';
+}
+
+export type ParsedTask = ParsedBlock & {
+	completed: boolean;
+	line: number;
+	indentLevel: number;
 }

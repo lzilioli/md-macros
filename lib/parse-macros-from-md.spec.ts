@@ -2,6 +2,17 @@ import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
 import { ParsedBlock, ParsedCodeBlock, ParsedMacros } from "./entries";
 
+const EMPTY_PARSE_RESULTS: ParsedMacros = {
+	custom: [],
+	quotes: [],
+	img: [],
+	references: {},
+	links: [],
+	codeBlocks: [],
+	tags: [],
+	tasks: [],
+};
+
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
 		it('works with no args', () => {
@@ -80,8 +91,7 @@ test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
+				...EMPTY_PARSE_RESULTS,
 				img: [{
 					isReferenceStyle: false,
 					altText: "alt text",
@@ -95,10 +105,6 @@ test string ${macro1Text}
 					title: "Title Text2",
 					fullMatch: macro1Text
 				}],
-				references: {},
-				links: [],
-				codeBlocks: [],
-				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -112,8 +118,7 @@ test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
+				...EMPTY_PARSE_RESULTS,
 				img: [{
 					isReferenceStyle: false,
 					altText: "",
@@ -127,10 +132,6 @@ test string ${macro1Text}
 					title: "",
 					fullMatch: macro1Text
 				}],
-				references: {},
-				links: [],
-				codeBlocks: [],
-				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -146,12 +147,12 @@ test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					name: 'youtube',
 					args: {url: 'test1'},
 					fullMatch: macro1Text,
 				}],
-				quotes: [],
 				img: [{
 					isReferenceStyle: false,
 					altText: "alt text",
@@ -159,15 +160,11 @@ test string ${macro1Text}
 					title: "Title Text",
 					fullMatch: macro0Text
 				}],
-				references: {},
-				links: [],
-				codeBlocks: [],
-				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
 
-		it('does not complain about TODO checkboxes', () => {
+		it('does not complain about TODO checkboxes, and parses them out', () => {
 			const md: string = `# This is a document
 
 - [ ] I want to have a checkbox
@@ -177,13 +174,101 @@ Thank you for attending my talk.
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
-				codeBlocks: [],
-				tags: [],
+				...EMPTY_PARSE_RESULTS,
+				tasks: [{
+					completed: false,
+					content: "- [ ] I want to have a checkbox\n",
+					indentLevel: 0,
+					index: 22,
+					length: 31,
+					line: 2,
+				}, {
+					completed: true,
+					content: "- [x] Here's a thing I finished\n",
+					indentLevel: 0,
+					index: 54,
+					length: 31,
+					line: 3,
+				}]
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('parses out tags and captures their proper intent level', () => {
+			const md: string = `# This is a document
+
+- [ ] I want to have a checkbox
+  - [ ] a child as well (2 spaces)
+	- [ ] a child as well (1 tab)
+- [x] Here's a thing I finished
+  - [X] Here's a thing I finished
+    - [x] Here's a thing I finished
+
+1. [ ] Yo
+2. [x] Yoooo
+
+Thank you for attending my talk.
+			`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
+				tasks: [{
+					completed: false,
+					content: "- [ ] I want to have a checkbox\n",
+					indentLevel: 0,
+					index: 22,
+					length: 31,
+					line: 2,
+				}, {
+					completed: false,
+					content: "  - [ ] a child as well (2 spaces)\n",
+					indentLevel: 1,
+					index: 54,
+					length: 34,
+					line: 3,
+				}, {
+					completed: false,
+					content: "\t- [ ] a child as well (1 tab)\n",
+					indentLevel: 1,
+					index: 89,
+					length: 30,
+					line: 4,
+				}, {
+					completed: true,
+					content: "- [x] Here's a thing I finished\n",
+					indentLevel: 0,
+					index: 120,
+					length: 31,
+					line: 5,
+				}, {
+					completed: true,
+					content: "  - [X] Here's a thing I finished\n",
+					indentLevel: 1,
+					index: 152,
+					length: 33,
+					line: 6,
+				}, {
+					completed: true,
+					content: "    - [x] Here's a thing I finished\n",
+					indentLevel: 2,
+					index: 186,
+					length: 35,
+					line: 7,
+				}, {
+					completed: false,
+					content: "1. [ ] Yo\n",
+					indentLevel: 0,
+					index: 223,
+					length: 9,
+					line: 9,
+				}, {
+					completed: true,
+					content: "2. [x] Yoooo\n",
+					indentLevel: 0,
+					index: 233,
+					length: 12,
+					line: 10,
+				}]
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -195,9 +280,7 @@ Thank you for attending my talk.
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
+				...EMPTY_PARSE_RESULTS,
 				references: {
 					'arbitrary case-insensitive reference text': {
 						value: 'https://www.mozilla.org',
@@ -220,9 +303,6 @@ Thank you for attending my talk.
 						title: "Logo Title Text 2",
 					}
 				},
-				links: [],
-				codeBlocks: [],
-				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -244,6 +324,7 @@ Thank you for attending my talk.
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					args: {
 						test: "what",
@@ -284,7 +365,6 @@ Thank you for attending my talk.
 					src: "www.example4.com",
 					title: "",
 				}],
-				quotes: [],
 				references: {
 					wat: {
 						value: 'www.example3.com',
@@ -341,8 +421,6 @@ Thank you for attending my talk.
 					referenceKey: 'oh and this',
 					title: "oh and this",
 				}],
-				codeBlocks: [],
-				tags: [],
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -372,11 +450,7 @@ if (!_.isArray(results)) {
 				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
 			});
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
+				...EMPTY_PARSE_RESULTS,
 				codeBlocks: [{
 					index: 1,
 					length: 11,
@@ -407,7 +481,6 @@ if (!_.isArray(results)) {
 					content: "```\nif (!_.isArray(results)) {\n\tresults = [results];\n}\n```",
 					type: 'block',
 				}],
-				tags: []
 			};
 			assert.deepEqual(macros, expected);
 		});
@@ -416,11 +489,7 @@ if (!_.isArray(results)) {
 			const md: string = '\n`some-code``some-more-code`';
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
+				...EMPTY_PARSE_RESULTS,
 				codeBlocks: [{
 					content: '`some-code`',
 					type: 'inline',
@@ -432,7 +501,6 @@ if (!_.isArray(results)) {
 					index: 12,
 					length: 16
 				}],
-				tags: []
 			};
 			macros.codeBlocks.forEach((codeBlock: ParsedCodeBlock): void => {
 				// Check that all of the ranges are correct
@@ -469,6 +537,7 @@ Hello this is the #3 rule. Exclude numbers. Jumpman #23, but allow stuff like #1
 but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					args: {
 						test: "macro-hash-title",
@@ -482,9 +551,6 @@ but not #1: test but #what. is cool but should remove the period.`;
 					fullMatch: "[[getLink test=\"macro-hash\"]]",
 					name: "getLink",
 				}],
-				quotes: [],
-				img: [],
-				references: {},
 				links: [{
 					title: 'mht',
 					href: '[[getLink test="macro-hash-title"]]#ze-hash',
@@ -504,7 +570,6 @@ but not #1: test but #what. is cool but should remove the period.`;
 					isReferenceStyle: false,
 					title: "",
 				}],
-				codeBlocks: [],
 				tags: [{
 					tag: "#sample",
 					fullMatch: "#sample,",
@@ -544,12 +609,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 			const md: string = `#what`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
-				codeBlocks: [],
+				...EMPTY_PARSE_RESULTS,
 				tags: [{
 					tag: "#what",
 					fullMatch: "#what",
@@ -571,11 +631,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				img: [],
-				references: {},
-				links: [],
-				codeBlocks: [],
+				...EMPTY_PARSE_RESULTS,
 				quotes: [
 					{
 						content: `> #header {
@@ -588,7 +644,6 @@ but not #1: test but #what. is cool but should remove the period.`;
 						length: 122,
 					}
 				],
-				tags: []
 			};
 			assert.deepEqual(macros, expected);
 			macros.quotes.forEach((codeBlock: ParsedCodeBlock): void => {
@@ -612,13 +667,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
-				codeBlocks: [],
-				tags: []
+				...EMPTY_PARSE_RESULTS,
 			};
 			assert.deepEqual(macros.tags, expected.tags);
 		});
@@ -636,12 +685,7 @@ tags:
 1. \`CODE_BLOCK\` ____ \`ANOTHER_ONE\``;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
-				custom: [],
-				quotes: [],
-				img: [],
-				references: {},
-				links: [],
-				codeBlocks: [],
+				...EMPTY_PARSE_RESULTS,
 				tags: [{
 					tag: '#privacy',
 					fullMatch: '#privacy',
@@ -659,13 +703,7 @@ tags:
 I am providing a phone #: xxx-yyy-zzz`;
 		const macros: ParsedMacros = parseMacrosFromMd(md);
 		const expected: ParsedMacros = {
-			custom: [],
-			quotes: [],
-			img: [],
-			references: {},
-			links: [],
-			codeBlocks: [],
-			tags: []
+			...EMPTY_PARSE_RESULTS,
 		};
 		assert.deepEqual(macros.tags, expected.tags);
 	});
@@ -694,8 +732,8 @@ Ahh. Thats right.
 			assert.strictEqual(block.content, md.substr(block.index, block.length));
 		});
 		const expected: ParsedMacros = {
-			custom: [],
-			quotes: [  {
+			...EMPTY_PARSE_RESULTS,
+			quotes: [{
 				content: '> This is what you said.\n' +
 					'> This is why you said it.\n' +
 					'> You said it with a #tag but we didnt listen.\n',
@@ -706,11 +744,6 @@ Ahh. Thats right.
 				index: 156,
 				length: 47
 			}],
-			img: [],
-			references: {},
-			links: [],
-			codeBlocks: [],
-			tags: []
 		};
 		assert.deepEqual(macros.quotes, expected.quotes);
 		assert.deepEqual(macros.tags, expected.tags);
@@ -733,11 +766,7 @@ Ahh. Thats right.
 			assert.strictEqual(block.content, md.substr(block.index, block.length));
 		});
 		const expected: ParsedMacros = {
-			custom: [],
-			quotes: [  ],
-			img: [],
-			references: {},
-			links: [],
+			...EMPTY_PARSE_RESULTS,
 			codeBlocks: [{
 				content: "`{ foo: foo }`",
 				index: 14,
@@ -769,7 +798,6 @@ Ahh. Thats right.
 				length: 11,
 				type: "inline",
 			}],
-			tags: []
 		};
 		assert.deepEqual(macros, expected);
 	});

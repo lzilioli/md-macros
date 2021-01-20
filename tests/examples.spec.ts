@@ -59,7 +59,8 @@ export async function test(): Promise<void> {
                                 index: 6,
                                 length: 5,
                                 tag: '#tag'
-                            }]
+                            }],
+                            tasks: []
                         }]
                     ]
                 );
