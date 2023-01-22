@@ -3,6 +3,7 @@
   "version": "3.5.0",
   "author": "Luke Zilioli (elzee08@gmail.com)",
   "main": "dist/lib/index.js",
+  "types": "dist/lib/typedefs.d.ts",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/lzilioli/md-macros.git"
