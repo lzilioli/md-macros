@@ -15,6 +15,7 @@ export interface ParsedMacros {
 	codeBlocks: ParsedCodeBlock[];
 	tags: ParsedTag[];
 	quotes: ParsedBlockQuote[];
+	headers: ParsedHeader[];
 	tasks: ParsedTask[];
 }
 
@@ -67,4 +68,9 @@ export type ParsedTask = ParsedBlock & {
 	completed: boolean;
 	line: number;
 	indentLevel: number;
+
+export type ParsedHeader = ParsedBlock & {
+	line: number;
+	text: string;
+	level: 1 | 2 | 3 | 4 | 5 | 6;
 }
