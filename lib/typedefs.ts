@@ -68,6 +68,11 @@ export type ParsedTask = ParsedBlock & {
 	completed: boolean;
 	line: number;
 	indentLevel: number;
+	/**
+	 * Can be null if task is at top of page
+	 */
+	parent: ParsedHeader | ParsedTask | null;
+}
 
 export type ParsedHeader = ParsedBlock & {
 	line: number;

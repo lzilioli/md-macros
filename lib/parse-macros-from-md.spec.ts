@@ -11,6 +11,7 @@ const EMPTY_PARSE_RESULTS: ParsedMacros = {
 	codeBlocks: [],
 	tags: [],
 	tasks: [],
+	headers: [],
 };
 
 export async function test(): Promise<void> {
@@ -164,6 +165,47 @@ test string ${macro1Text}
 			assert.deepEqual(macros, expected);
 		});
 
+		it('sets task parent to null when no header precedes it', () => {
+			const md: string = `Whats up?
+
+- [ ] I want to have a checkbox
+	- [x] Here's a thing I finished
+
+Thank you for attending my talk.
+			`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
+				headers: [],
+				tasks: [{
+					completed: false,
+					content: "- [ ] I want to have a checkbox\n",
+					indentLevel: 0,
+					index: 11,
+					length: 31,
+					line: 2,
+					parent: null,
+				}, {
+					completed: true,
+					content: "\t- [x] Here's a thing I finished\n",
+					indentLevel: 1,
+					index: 43,
+					length: 32,
+					line: 3,
+					parent: {
+						completed: false,
+						content: "- [ ] I want to have a checkbox\n",
+						indentLevel: 0,
+						index: 11,
+						length: 31,
+						line: 2,
+						parent: null,
+					},
+				}]
+			};
+			assert.deepEqual(macros, expected);
+		});
+
 		it('does not complain about TODO checkboxes, and parses them out', () => {
 			const md: string = `# This is a document
 
@@ -175,6 +217,14 @@ Thank you for attending my talk.
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				...EMPTY_PARSE_RESULTS,
+				headers: [{
+					text: 'This is a document',
+					content: '# This is a document',
+					index: 0,
+					length: 20,
+					level: 1,
+					line: 0,
+				}],
 				tasks: [{
 					completed: false,
 					content: "- [ ] I want to have a checkbox\n",
@@ -182,6 +232,14 @@ Thank you for attending my talk.
 					index: 22,
 					length: 31,
 					line: 2,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}, {
 					completed: true,
 					content: "- [x] Here's a thing I finished\n",
@@ -189,6 +247,14 @@ Thank you for attending my talk.
 					index: 54,
 					length: 31,
 					line: 3,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}]
 			};
 			assert.deepEqual(macros, expected);
@@ -212,6 +278,14 @@ Thank you for attending my talk.
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				...EMPTY_PARSE_RESULTS,
+				headers: [{
+					text: 'This is a document',
+					content: '# This is a document',
+					index: 0,
+					length: 20,
+					level: 1,
+					line: 0,
+				}],
 				tasks: [{
 					completed: false,
 					content: "- [ ] I want to have a checkbox\n",
@@ -219,6 +293,14 @@ Thank you for attending my talk.
 					index: 22,
 					length: 31,
 					line: 2,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}, {
 					completed: false,
 					content: "  - [ ] a child as well (2 spaces)\n",
@@ -226,6 +308,22 @@ Thank you for attending my talk.
 					index: 54,
 					length: 34,
 					line: 3,
+					parent: {
+						completed: false,
+						content: "- [ ] I want to have a checkbox\n",
+						indentLevel: 0,
+						index: 22,
+						length: 31,
+						line: 2,
+						parent: {
+							text: 'This is a document',
+							content: '# This is a document',
+							index: 0,
+							length: 20,
+							level: 1,
+							line: 0,
+						},
+					},
 				}, {
 					completed: false,
 					content: "\t- [ ] a child as well (1 tab)\n",
@@ -233,6 +331,22 @@ Thank you for attending my talk.
 					index: 89,
 					length: 30,
 					line: 4,
+					parent: {
+						completed: false,
+						content: "- [ ] I want to have a checkbox\n",
+						indentLevel: 0,
+						index: 22,
+						length: 31,
+						line: 2,
+						parent: {
+							text: 'This is a document',
+							content: '# This is a document',
+							index: 0,
+							length: 20,
+							level: 1,
+							line: 0,
+						},
+					},
 				}, {
 					completed: true,
 					content: "- [x] Here's a thing I finished\n",
@@ -240,6 +354,14 @@ Thank you for attending my talk.
 					index: 120,
 					length: 31,
 					line: 5,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}, {
 					completed: true,
 					content: "  - [X] Here's a thing I finished\n",
@@ -247,6 +369,22 @@ Thank you for attending my talk.
 					index: 152,
 					length: 33,
 					line: 6,
+					parent: {
+						completed: true,
+						content: "- [x] Here's a thing I finished\n",
+						indentLevel: 0,
+						index: 120,
+						length: 31,
+						line: 5,
+						parent: {
+							text: 'This is a document',
+							content: '# This is a document',
+							index: 0,
+							length: 20,
+							level: 1,
+							line: 0,
+						},
+					},
 				}, {
 					completed: true,
 					content: "    - [x] Here's a thing I finished\n",
@@ -254,6 +392,30 @@ Thank you for attending my talk.
 					index: 186,
 					length: 35,
 					line: 7,
+					parent: {
+						completed: true,
+						content: "  - [X] Here's a thing I finished\n",
+						indentLevel: 1,
+						index: 152,
+						length: 33,
+						line: 6,
+						parent: {
+							completed: true,
+							content: "- [x] Here's a thing I finished\n",
+							indentLevel: 0,
+							index: 120,
+							length: 31,
+							line: 5,
+							parent: {
+								text: 'This is a document',
+								content: '# This is a document',
+								index: 0,
+								length: 20,
+								level: 1,
+								line: 0,
+							},
+						},
+					},
 				}, {
 					completed: false,
 					content: "1. [ ] Yo\n",
@@ -261,6 +423,14 @@ Thank you for attending my talk.
 					index: 223,
 					length: 9,
 					line: 9,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}, {
 					completed: true,
 					content: "2. [x] Yoooo\n",
@@ -268,6 +438,14 @@ Thank you for attending my talk.
 					index: 233,
 					length: 12,
 					line: 10,
+					parent: {
+						text: 'This is a document',
+						content: '# This is a document',
+						index: 0,
+						length: 20,
+						level: 1,
+						line: 0,
+					},
 				}]
 			};
 			assert.deepEqual(macros, expected);
@@ -570,6 +748,21 @@ but not #1: test but #what. is cool but should remove the period.`;
 					isReferenceStyle: false,
 					title: "",
 				}],
+				headers: [{
+					content: '# Header',
+					index: 101,
+					length: 8,
+					level: 1,
+					line: 8,
+					text: 'Header'
+				}, {
+					content: '## Nested Header',
+					index: 118,
+					length: 16,
+					level: 2,
+					line: 12,
+					text: 'Nested Header'
+				}],
 				tags: [{
 					tag: "#sample",
 					fullMatch: "#sample,",
@@ -632,6 +825,14 @@ but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
 			const expected: ParsedMacros = {
 				...EMPTY_PARSE_RESULTS,
+				headers: [{
+					content: '# Hello',
+					index: 0,
+					length: 7,
+					level: 1,
+					line: 0,
+					text: 'Hello'
+				}],
 				quotes: [
 					{
 						content: `> #header {

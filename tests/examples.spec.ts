@@ -1,6 +1,6 @@
-import {creatingMacrosUsageExample} from '@examples/creating-macros-usage';
-import {parseMacrosFromMdUsageExample} from '@examples/parse-macros-from-md-usage';
-import {replaceMacrosInMdUsageExample} from '@examples/replace-macros-in-md-usage';
+import { creatingMacrosUsageExample } from '@examples/creating-macros-usage';
+import { parseMacrosFromMdUsageExample } from '@examples/parse-macros-from-md-usage';
+import { replaceMacrosInMdUsageExample } from '@examples/replace-macros-in-md-usage';
 import * as assert from 'assert';
 
 export async function test(): Promise<void> {
@@ -32,6 +32,7 @@ export async function test(): Promise<void> {
                                 args: { url: '<youtube embed url>' },
                                 fullMatch: '[[youtube url="<youtube embed url>"]]'
                             }],
+                            headers: [],
                             img: [{
                                 isReferenceStyle: false,
                                 altText: "alt text",

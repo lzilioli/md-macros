@@ -1,7 +1,7 @@
 import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask } from '@lib/typedefs';
 import cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
-import { some } from 'lodash';
+import { isUndefined, last, some } from 'lodash';
 import { CodeBlockExtractor, ExtractorResults, getCodeBlockExtractor } from './static-tree-helpers';
 
 function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
@@ -108,10 +108,11 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 
 	// Parse out headers
 	let headerIdx: number = 0;
+	const headerLines: Record<number, ParsedHeader> = {};
 	splitMd.forEach((line: string, lineNo: number): void => {
 		headerRegex.lastIndex = 0;
 		if (!line.match(headerRegex)) {
-			headerIdx += line.length;
+			headerIdx += line.length + 1;
 			return;
 		}
 		const header: ParsedHeader = {
@@ -122,20 +123,42 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			index: headerIdx,
 			level: headerRegex.exec(line)[1].length as 1 | 2 | 3 | 4 | 5 | 6,
 		};
+		headerLines[lineNo] = header;
 		headers.push(header);
-		headerIdx += line.length;
+		headerIdx += line.length + 1;
 	});
 
 	// Parse out tasks
 	let taskIdx: number = 0;
+	let lastTaskIndentLevel: undefined | number;
+	let curTaskParent: ParsedHeader | ParsedTask | null = null;
+	let previousTaskParent: (ParsedHeader | ParsedTask | null)[] = [null];
 	splitMd.forEach((line: string, lineNo: number): void => {
+		if (headerLines[lineNo]) {
+			curTaskParent = headerLines[lineNo];
+			previousTaskParent = [headerLines[lineNo]];
+		}
 		if (/^\s*?\d+?\. \[x? ?\].*?$|^\s*?- \[x? ?\].*?$/gi.test(line)) {
 			const completed: boolean = /\[X\]/i.test(line);
-			const match: RegExpExecArray = /^\s+/.exec(line.replace(/\t/g, '  '));
+			const indentMatch: RegExpExecArray = /^\s+/.exec(line.replace(/\t/g, '  '));
 			let indentLevel: number = 0;
-			if (match) {
-				indentLevel = match[0].length / 2;
+			if (indentMatch) {
+				indentLevel = indentMatch[0].length / 2;
 			}
+			if (isUndefined(lastTaskIndentLevel)) {
+				lastTaskIndentLevel = indentLevel;
+			}
+			// We have increased the indent level
+			if (indentLevel > lastTaskIndentLevel) {
+				previousTaskParent.push(curTaskParent);
+				curTaskParent = last(tasks);
+			} else if (indentLevel < lastTaskIndentLevel) {
+				while (indentLevel < lastTaskIndentLevel && previousTaskParent.length) {
+					curTaskParent = previousTaskParent.pop();
+					lastTaskIndentLevel--;
+				}
+			}
+			lastTaskIndentLevel = indentLevel;
 			tasks.push({
 				index: taskIdx,
 				length: line.length,
@@ -143,6 +166,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				line: lineNo,
 				completed,
 				indentLevel,
+				parent: curTaskParent,
 			});
 		}
 		taskIdx += line.length + 1;
