@@ -30,7 +30,7 @@
     "cheerio": "^1.0.0-rc.3",
     "commonmark": "^0.29.3",
     "lodash": "^4.17.15",
-    "minimatch": "^3.0.4",
+    "minimatch": "^3.0.5",
     "remark": "^12.0.0",
     "remark-toc": "^7.0.0"
   },
