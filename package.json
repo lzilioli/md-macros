@@ -47,7 +47,7 @@
     "gulp-if": "^3.0.0",
     "gulp-rimraf": "^1.0.0",
     "gulp-todo": "^7.1.1",
-    "mocha": "^7.1.2",
+    "mocha": "^10.2.0",
     "mock-fs": "^4.12.0",
     "nodemon": "^2.0.3",
     "ts-loader": "^7.0.3",
