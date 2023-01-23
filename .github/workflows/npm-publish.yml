@@ -3,9 +3,6 @@ name: Publish
 # https://sergiodxa.com/articles/github-actions-npm-publish/
 # https://help.github.com/en/actions/language-and-framework-guides/publishing-nodejs-packages
 on:
-  push:
-    branches:
-      - stable
   create:
     tags:
       - v*
