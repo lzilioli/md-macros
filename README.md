@@ -3,7 +3,7 @@
 
 Extensible macro processing framework for markdown, written in TypeScript.
 
-![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
+![lint, build, and test](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=stable)
 
 # Table Of Contents
 
