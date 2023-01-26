@@ -3,7 +3,7 @@
 
 Extensible macro processing framework for markdown, written in TypeScript.
 
-![lint, build, and test](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=stable)
+![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
 # Table Of Contents
 
@@ -117,6 +117,7 @@ export interface ParsedMacros {
 	codeBlocks: ParsedCodeBlock[];
 	tags: ParsedTag[];
 	quotes: ParsedBlockQuote[];
+	headers: ParsedHeader[];
 	tasks: ParsedTask[];
 }
 
@@ -169,6 +170,16 @@ export type ParsedTask = ParsedBlock & {
 	completed: boolean;
 	line: number;
 	indentLevel: number;
+	/**
+	 * Can be null if task is at top of page
+	 */
+	parent: ParsedHeader | ParsedTask | null;
+}
+
+export type ParsedHeader = ParsedBlock & {
+	line: number;
+	text: string;
+	level: 1 | 2 | 3 | 4 | 5 | 6;
 }
 ```
 
@@ -228,52 +239,175 @@ export async function replaceMacrosInMdUsageExample(): Promise<void> {
 ##### Usage
 
 ```typescript
-import {parseMacrosFromMd, ParsedMacros} from '@lzilioli/md-macros';
+import { ParsedMacros, parseMacrosFromMd } from '@lzilioli/md-macros';
 
 export async function parseMacrosFromMdUsageExample(): Promise<void> {
     const md: string = `
-Hello #tag [Link](/home) \`code\` [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
+Hello #tag
+
+[Link](/home)
+Here is some inline code \`code\`
+
+YouTube macro: [[youtube url="<youtube embed url>"]]
+
+Image: ![alt text](www.example.com/example.png "Title Text")
+
+[Reference style link][link1]
+
+# Todo List
+
+- [ ] What?
+- [X] This is cool
+    - [ ] This is a child task
+
+# Multiple lists per note
+
+- [ ] Nice!
+
+[link1]: https://www.example.com
     `;
 
-    const macros: ParsedMacros = parseMacrosFromMd(md);
+    const EXPECTED_PARSED_MACROS: ParsedMacros = parseMacrosFromMd(md);
 
-    console.log(macros)
-    /*
-        {
-            custom: [{
-                name: 'youtube',
-                args: { url: '<youtube embed url>' },
-                fullMatch: '[[youtube url="<youtube embed url>"]]'
-            }],
-            img: [{
-                isReferenceStyle: false,
-                altText: "alt text",
-                src: "www.example.com/example.png",
-                title: "Title Text",
-                fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
-            }],
-            references: {},
-            links: [{
-                altText: 'Link',
-                fullMatch: '[Link](/home)',
-                href: '/home',
-                isReferenceStyle: false,
-                title: "",
-            }],
-            codeBlocks: [{
-                content: '`code`',
-                index: 26,
-                length: 6
-            }],
-            tags: [{
-                fullMatch: ' #tag',
-                index: 6,
-                length: 5,
-                tag: '#tag'
-            }]
-        }
-    */
+    console.log(EXPECTED_PARSED_MACROS)
 }
+```
+
+```typescript
+import { ParsedMacros } from '@lib/typedefs';
+
+export const EXPECTED_PARSED_MACROS: ParsedMacros = {
+    custom: [{
+        name: 'youtube',
+        args: { url: '<youtube embed url>' },
+        fullMatch: '[[youtube url="<youtube embed url>"]]'
+    }],
+    headers: [{
+        content: "# Todo List",
+        index: 207,
+        length: 11,
+        level: 1,
+        line: 12,
+        text: "Todo List",
+    }, {
+        content: "# Multiple lists per note",
+        index: 283,
+        length: 25,
+        level: 1,
+        line: 18,
+        text: "Multiple lists per note",
+    }],
+    img: [{
+        isReferenceStyle: false,
+        altText: "alt text",
+        src: "www.example.com/example.png",
+        title: "Title Text",
+        fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
+    }],
+    quotes: [],
+    references: {
+        "link1": {
+            "fullMatch": "[link1]: https://www.example.com",
+            "title": "",
+            "value": "https://www.example.com",
+        }
+    },
+    links: [{
+        altText: 'Link',
+        fullMatch: '[Link](/home)',
+        href: '/home',
+        isReferenceStyle: false,
+        title: "",
+    }, {
+        altText: "",
+        fullMatch: "[Reference style link][link1]",
+        href: "https://www.example.com",
+        isReferenceStyle: true,
+        referenceKey: "link1",
+        title: "Reference style link",
+    }],
+    codeBlocks: [{
+        content: '`code`',
+        type: 'inline',
+        index: 46,
+        length: 6
+    }],
+    tags: [{
+        fullMatch: ' #tag',
+        index: 6,
+        length: 5,
+        tag: '#tag'
+    }],
+    tasks: [{
+        completed: false,
+        content: "- [ ] What?\n",
+        indentLevel: 0,
+        index: 220,
+        length: 11,
+        line: 14,
+        parent: {
+            content: "# Todo List",
+            index: 207,
+            length: 11,
+            level: 1,
+            line: 12,
+            text: "Todo List",
+        }
+    }, {
+        completed: true,
+        content: "- [X] This is cool\n",
+        indentLevel: 0,
+        index: 232,
+        length: 18,
+        line: 15,
+        parent: {
+            content: "# Todo List",
+            index: 207,
+            length: 11,
+            level: 1,
+            line: 12,
+            text: "Todo List",
+        }
+    }, {
+        completed: false,
+        content: "    - [ ] This is a child task\n",
+        indentLevel: 2,
+        index: 251,
+        length: 30,
+        line: 16,
+        parent: {
+            completed: true,
+            content: "- [X] This is cool\n",
+            indentLevel: 0,
+            index: 232,
+            length: 18,
+            line: 15,
+            parent: {
+                content: "# Todo List",
+                index: 207,
+                length: 11,
+                level: 1,
+                line: 12,
+                text: "Todo List",
+            }
+        }
+    }, {
+        completed: false,
+        content: "- [ ] Nice!\n",
+        indentLevel: 0,
+        index: 310,
+        length: 11,
+        line: 20,
+        parent: {
+            content: "# Multiple lists per note",
+            index: 283,
+            length: 25,
+            level: 1,
+            line: 18,
+            text: "Multiple lists per note",
+        }
+    }]
+};
 ```
 
 #### Bundled macros

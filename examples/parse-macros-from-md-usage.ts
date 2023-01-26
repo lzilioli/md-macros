@@ -1,46 +1,32 @@
-import {parseMacrosFromMd, ParsedMacros} from '@lzilioli/md-macros';
+import { ParsedMacros, parseMacrosFromMd } from '@lzilioli/md-macros';
 
 export async function parseMacrosFromMdUsageExample(): Promise<void> {
     const md: string = `
-Hello #tag [Link](/home) \`code\` [[youtube url="<youtube embed url>"]] ![alt text](www.example.com/example.png "Title Text")
+Hello #tag
+
+[Link](/home)
+Here is some inline code \`code\`
+
+YouTube macro: [[youtube url="<youtube embed url>"]]
+
+Image: ![alt text](www.example.com/example.png "Title Text")
+
+[Reference style link][link1]
+
+# Todo List
+
+- [ ] What?
+- [X] This is cool
+    - [ ] This is a child task
+
+# Multiple lists per note
+
+- [ ] Nice!
+
+[link1]: https://www.example.com
     `;
 
-    const macros: ParsedMacros = parseMacrosFromMd(md);
+    const EXPECTED_PARSED_MACROS: ParsedMacros = parseMacrosFromMd(md);
 
-    console.log(macros)
-    /*
-        {
-            custom: [{
-                name: 'youtube',
-                args: { url: '<youtube embed url>' },
-                fullMatch: '[[youtube url="<youtube embed url>"]]'
-            }],
-            img: [{
-                isReferenceStyle: false,
-                altText: "alt text",
-                src: "www.example.com/example.png",
-                title: "Title Text",
-                fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
-            }],
-            references: {},
-            links: [{
-                altText: 'Link',
-                fullMatch: '[Link](/home)',
-                href: '/home',
-                isReferenceStyle: false,
-                title: "",
-            }],
-            codeBlocks: [{
-                content: '`code`',
-                index: 26,
-                length: 6
-            }],
-            tags: [{
-                fullMatch: ' #tag',
-                index: 6,
-                length: 5,
-                tag: '#tag'
-            }]
-        }
-    */
+    console.log(EXPECTED_PARSED_MACROS)
 }

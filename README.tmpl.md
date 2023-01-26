@@ -97,6 +97,10 @@ This method is where all of the magic happens.
 [[inlineFile path="examples/parse-macros-from-md-usage.ts"]]
 ```
 
+```typescript
+[[inlineFile path="tests/expected-parsed-macros.ts"]]
+```
+
 #### Bundled macros
 
 This package is intended to aid in the markdown processing pipeline by introducing the *concept* of macros. To that end, it doesn't provide many macros for consumption.
