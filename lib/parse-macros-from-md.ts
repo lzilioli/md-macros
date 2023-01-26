@@ -1,7 +1,7 @@
 import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask } from '@lib/typedefs';
 import cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
-import { isUndefined, last, some } from 'lodash';
+import { isArray, isUndefined, last, some } from 'lodash';
 import { CodeBlockExtractor, ExtractorResults, getCodeBlockExtractor } from './static-tree-helpers';
 
 function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
@@ -29,7 +29,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const links: ParsedLink[] = [];
 	const references: ParsedReferences = {};
 	const tags: ParsedTag[] = [];
-	const headers: ParsedHeader[] = [];
+	const headers: ParsedHeader[] = parseHeadersFromMd(md);
 
 	// Markdown parser which will help us walk the tree
 	const reader: commonmark.Parser = new commonmark.Parser();
@@ -63,7 +63,6 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const referenceImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\[([^\]]+)\]/gm;
 	const selfReferenceRegex: RegExp = /!{0,1}[^\]]\[([^\]]+)][^[:(\]]/gm;
 	const tagRegex: RegExp = /\s(#[^\s,#,\])]+),?|^(#[^\s,#,\])]+),?/gms;
-	const headerRegex: RegExp = /^(#+) /g;
 
 	// commonmark was added after this repo was created. At present, we only use
 	// the commonmark walker for parsing code blocks out of the markdown string.
@@ -106,27 +105,11 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		blockIdx += line.length + 1;
 	});
 
-	// Parse out headers
-	let headerIdx: number = 0;
+	// Memoize headers (required for task parsing)
 	const headerLines: Record<number, ParsedHeader> = {};
-	splitMd.forEach((line: string, lineNo: number): void => {
-		headerRegex.lastIndex = 0;
-		if (!line.match(headerRegex)) {
-			headerIdx += line.length + 1;
-			return;
-		}
-		const header: ParsedHeader = {
-			text: line.replace(headerRegex, ''),
-			line: lineNo,
-			content: line,
-			length: line.length,
-			index: headerIdx,
-			level: headerRegex.exec(line)[1].length as 1 | 2 | 3 | 4 | 5 | 6,
-		};
-		headerLines[lineNo] = header;
-		headers.push(header);
-		headerIdx += line.length + 1;
-	});
+	headers.forEach((header: ParsedHeader): void => {
+		headerLines[header.line] = header;
+	})
 
 	// Parse out tasks
 	let taskIdx: number = 0;
@@ -390,4 +373,35 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		quotes: blockQuotes,
 		headers,
 	};
+}
+
+const headerRegex: RegExp = /^(#+) /g;
+export function parseHeadersFromMd(md: string | string[]): ParsedHeader[] {
+	const headers: ParsedHeader[] = [];
+	let splitMd: string[];
+	if (isArray(md)) {
+		splitMd = md;
+	} else {
+		splitMd = md.split('\n');
+	}
+	// Parse out headers
+	let headerIdx: number = 0;
+	splitMd.forEach((line: string, lineNo: number): void => {
+		headerRegex.lastIndex = 0;
+		if (!line.match(headerRegex)) {
+			headerIdx += line.length + 1;
+			return;
+		}
+		const header: ParsedHeader = {
+			text: line.replace(headerRegex, ''),
+			line: lineNo,
+			content: line,
+			length: line.length,
+			index: headerIdx,
+			level: headerRegex.exec(line)[1].length as 1 | 2 | 3 | 4 | 5 | 6,
+		};
+		headers.push(header);
+		headerIdx += line.length + 1;
+	});
+	return headers;
 }

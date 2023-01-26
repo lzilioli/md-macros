@@ -5,42 +5,26 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 ![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
-# Table Of Contents
+# Table of Contents
 
+-   [md-macros](#md-macros)
 -   [Overview](#overview)
-
     -   [Sample Use Case](#sample-use-case)
-
 -   [Usage](#usage)
-
     -   [cli](#cli)
-
     -   [nodejs](#nodejs)
-
         -   [Typedefs](#typedefs)
-
         -   [Methods](#methods)
-
-            -   [replaceMacrosInMd](#replacemacrosinmd)
-
-                -   [Usage](#usage-1)
-
-            -   [parseMacrosFromMd](#parsemacrosfrommd)
-
-                -   [Usage](#usage-2)
-
+            -   [replaceMacrosInMd](#replace-macros-in-md)
+                -   [Usage](#usage)
+            -   [parseMacrosFromMd](#parse-macros-from-md)
+                -   [Usage](#usage)
             -   [Bundled macros](#bundled-macros)
-
                 -   [youtube](#youtube)
-
                     -   [args](#args)
-
-                -   [mdToc](#mdtoc)
-
-                -   [inlineFile](#inlinefile)
-
-                    -   [args](#args-1)
-
+                -   [mdToc](#md-toc)
+                -   [inlineFile](#inline-file)
+                    -   [args](#args)
 -   [Custom macros](#custom-macros)
 
 # Overview

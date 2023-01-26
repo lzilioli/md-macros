@@ -1,10 +1,9 @@
-import * as remark from 'remark';
-import * as toc from 'remark-toc';
-import { MacroMethod } from '@lib/typedefs';
+import { parseHeadersFromMd } from '@lib/parse-macros-from-md';
 import { replaceMacrosInMd } from '@lib/replace-macros-in-md';
+import { MacroMethod, ParsedHeader } from '@lib/typedefs';
 import * as fs from 'fs';
+import { constant, kebabCase, times } from 'lodash';
 import * as util from 'util';
-
 const readFileAsync: (path: string) => Promise<Buffer> = util.promisify(fs.readFile);
 const fileExistsAsync: (path: string) => Promise<boolean> = util.promisify(fs.exists);
 
@@ -26,36 +25,18 @@ allowfullscreen
 ></iframe>`);
 }
 
-export const mdToc: MacroMethod = (_args: {}, mdText: string): Promise<string> => {
-    return new Promise((yep: (result: string) => void, nope: (e: Error) => void) => {
-        replaceMacrosInMd(mdText, {
-            mdToc: () => Promise.resolve('# Table Of Contents\n\n# Table Of Contents End')
-        }, ['!mdToc'])
-        .then((modifiedMdText: string) => {
-            remark()
-            .use(toc)
-            .process(modifiedMdText, (err: Error, file: unknown) => {
-                if (err) {
-                    nope(err);
-                    return;
-                }
-                const contents: string = (file as {contents: string}).contents;
-                const TOC_REGEX: RegExp = /(# Table Of Contents(?:[\s\S](?!# Table Of Contents End))*)\n# Table Of Contents End/;
-                const match: RegExpMatchArray = contents.match(TOC_REGEX);
-                if (!match) {
-                    // This likely points to an internal error of this method and not an issue
-                    // with the calling code.
-                    nope(new Error('TOC could not be found'));
-                }
-                yep(
-                    match[1]
-                        .replace(`-   [Table Of Contents End](#table-of-contents-end)\n`, '')
-                        .replace(`# Table Of Contents\n\n\n`, `# Table Of Contents\n\n`)
-                        .trim()
-                    );
-            });
-        });
-    });
+export const mdToc: MacroMethod = async (_args: never, mdText: string): Promise<string> => {
+    const modifiedMdText: string = await replaceMacrosInMd(mdText, {
+        mdToc: () => Promise.resolve('TABLE_OF_CONTENTS_GOES_HERE')
+    }, ['!mdToc']);
+    const headers: ParsedHeader[] = parseHeadersFromMd(modifiedMdText);
+    const toc: string = headers.map((header: ParsedHeader): string => {
+        return `${times(header.level - 1, constant('    ')).join('')}-   [${header.text}](#${kebabCase(header.text)})`;
+    }).join('\n');
+    const tocText: string = `# Table of Contents
+
+${toc}`;
+    return tocText;
 }
 
 export const inlineFile: MacroMethod = async(args: {path: string}): Promise<string> => {

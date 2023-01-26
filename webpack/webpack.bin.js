@@ -5,7 +5,7 @@ const nodeExternals = require('webpack-node-externals');
 const getWebpackEntryMap = require('./util/getWebpackEntryMap');
 const appPaths = require('../app-paths')
 
-module.exports = merge([
+module.exports = merge.merge([
 	require('./util/webpack.base.js'),
 	{
 		target: 'node',

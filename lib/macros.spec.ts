@@ -1,6 +1,6 @@
-import assert from 'assert';
 import * as macros from '@lib/macros';
 import { replaceMacrosInMd } from '@lib/replace-macros-in-md';
+import assert from 'assert';
 import * as mock from 'mock-fs';
 
 export async function test(): Promise<void> {
@@ -132,18 +132,13 @@ jk
 
 finally...`);
 
-			const expected: string = `# Table Of Contents
+			const expected: string = `# Table of Contents
 
 -   [Some Other Section](#some-other-section)
-
 -   [This is the first section](#this-is-the-first-section)
-
     -   [It has a child](#it-has-a-child)
-
 -   [Yep!](#yep)
-
     -   [Nope](#nope)
-
         -   [Ok, it works!](#ok-it-works)`;
 			assert.strictEqual(
 				result,
@@ -151,7 +146,7 @@ finally...`);
 			);
 		});
 
-		it('does not leak Table Of Contents End header', async () => {
+		it('does not leak TABLE_OF_CONTENTS_GOES_HERE text', async () => {
 			const result: string = await macros.mdToc({}, `---
 title: A markown file with some front matter
 ---
@@ -163,9 +158,11 @@ title: A markown file with some front matter
 
 Hello
 
-# Another One!`);
+# Another One!
 
-			const expected: string = `# Table Of Contents
+Boss`);
+
+			const expected: string = `# Table of Contents
 
 -   [A heading](#a-heading)
 -   [Another One!](#another-one)`;
@@ -211,18 +208,13 @@ finally...`, {mdToc: macros.mdToc}, ['macro']);
 
 This is a short document, but it needs a
 
-# Table Of Contents
+# Table of Contents
 
 -   [Some Other Section](#some-other-section)
-
 -   [This is the first section](#this-is-the-first-section)
-
     -   [It has a child](#it-has-a-child)
-
 -   [Yep!](#yep)
-
     -   [Nope](#nope)
-
         -   [Ok, it works!](#ok-it-works)
 
 # Some Other Section
@@ -250,6 +242,7 @@ jk
 ### Ok, it works!
 
 finally...`;
+console.log(result)
 			assert.strictEqual(
 				result,
 				expected
