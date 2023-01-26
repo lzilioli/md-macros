@@ -1,6 +1,6 @@
 {
   "name": "@lzilioli/md-macros",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "author": "Luke Zilioli (elzee08@gmail.com)",
   "main": "dist/lib/index.js",
   "types": "dist/lib/typedefs.d.ts",
