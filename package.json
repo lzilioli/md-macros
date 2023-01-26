@@ -27,7 +27,7 @@
     "mdmacros": "dist/bin/index.js"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
+    "cheerio": "^1.0.0-rc.12",
     "commonmark": "^0.30.0",
     "lodash": "^4.17.21",
     "minimatch": "^6.1.6"
