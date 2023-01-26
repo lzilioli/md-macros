@@ -7,7 +7,7 @@
         "sourceMap": true,
         "checkJs": false,
         "allowJs": true,
-        "target": "es6",
+        "target": "ES2022",
         "declaration": true,
         "declarationMap": true,
         "declarationDir": "dist",

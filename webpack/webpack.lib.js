@@ -14,7 +14,9 @@ module.exports = merge.merge([
 			path: path.resolve(path.join(appPaths.distFolder, appPaths.libFolder)),
 			filename: '[name].js',
 			library: 'mdMacros',
-			libraryTarget: 'commonjs2'
+			libraryTarget: 'umd',
+			umdNamedDefine: true,
+			globalObject: `(typeof self !== 'undefined' ? self : this)`
 		},
 		resolve: {
 			alias: {
