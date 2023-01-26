@@ -1,5 +1,5 @@
 import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask } from '@lib/typedefs';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
 import { isArray, isUndefined, last, some } from 'lodash';
 import { CodeBlockExtractor, ExtractorResults, getCodeBlockExtractor } from './static-tree-helpers';
@@ -182,7 +182,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				.replace(/ {2}/g, ' ')
 				.trim();
 		}
-		const $: cheerio = cheerio.load(`<div ${argsString}></div>`);
+		const $: cheerio.CheerioAPI = cheerio.load(`<div ${argsString}></div>`);
 		const args: unknown = {
 			...$('div').attr()
 		};
