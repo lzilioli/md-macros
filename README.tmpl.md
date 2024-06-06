@@ -5,7 +5,7 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 ![Node.js CI](https://github.com/lzilioli/md-macros/workflows/Node.js%20CI/badge.svg?branch=master)
 
-[[mdToc]]
+[[macro:mdToc]]
 
 # Overview
 
@@ -40,7 +40,7 @@ This is not ideal for two reasons:
 ```md
 This is my super clean markdown document thanks to md-macros!
 This is all I need to type in order to include a video.
-[[youtube url="<youtube-embed-url>"]]
+[[macro:youtube url="<youtube-embed-url>"]]
 ```
 
 A clear improvement.

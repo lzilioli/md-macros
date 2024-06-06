@@ -7,20 +7,20 @@ export async function test(): Promise<void> {
 	describe( 'replaceMacrosInMd', () => {
 		it('throws if macro is missing', () => {
 			assert.rejects(async ()=>{
-				return replaceMacrosInMd(`[[sampleMacro]]`, {});
+				return replaceMacrosInMd(`[[macro:sampleMacro]]`, {});
 			}, new Error('md string contained macro sampleMacro, but no such macro was passed'));
 		});
 
 		it('throws if macro is not a function', () => {
 			assert.rejects(async ()=>{
-				return replaceMacrosInMd(`[[sampleMacro]]`, {
+				return replaceMacrosInMd(`[[macro:sampleMacro]]`, {
 					sampleMacro: 'test' as unknown as MacroMethod
 				});
 			}, new Error('macro sampleMacro is not a function'));
 		});
 
 		it('works with no args', async () => {
-			const macroText: string = `[[test]]`;
+			const macroText: string = `[[macro:test]]`;
 			const EXPECTED: string = 'BLAH BLAH';
 			const finalText: string = await replaceMacrosInMd(macroText, {
 				test: () => {return Promise.resolve(EXPECTED);}
@@ -30,7 +30,7 @@ export async function test(): Promise<void> {
 
 		it('passes the original text as the last argument', async () => {
 			const EXPECTED: string = 'BLAH BLAH';
-			const markdownText: string = `[[test yo="${EXPECTED}"]]`;
+			const markdownText: string = `[[macro:test yo="${EXPECTED}"]]`;
 			const finalText: string = await replaceMacrosInMd(markdownText, {
 				test: (args: {yo: string}, mdText: string) => {
 					assert.equal(mdText, markdownText);
@@ -41,8 +41,8 @@ export async function test(): Promise<void> {
 		});
 
 		it('captures multiple macros', async () => {
-			const macro0Text: string = `[[youtube url="test1"]]`;
-			const macro1Text: string = `[[youtube
+			const macro0Text: string = `[[macro:youtube url="test1"]]`;
+			const macro1Text: string = `[[macro:youtube
 				url="test2"
 				arg1="val1"
 			]]`;
@@ -66,10 +66,10 @@ allowfullscreen
 		});
 
 		it('allows macro calls within links', async () => {
-			const md: string = `[[youtube url="test1"]]
+			const md: string = `[[macro:youtube url="test1"]]
 
-[this is the link text]([[postLink slug="this-the-slug"]])
-[this is the link text]([[postLink slug="this-the-slug2"]] "with a title")
+[this is the link text]([[macro:postLink slug="this-the-slug"]])
+[this is the link text]([[macro:postLink slug="this-the-slug2"]] "with a title")
 
 [1]: www.example.com`;
 			const finalText: string = await replaceMacrosInMd(md, {
@@ -93,9 +93,9 @@ allowfullscreen
 		});
 
 		it('replaces macros within links', async () => {
-			const md: string = `[hello2]([[getLink test="what"]] "test title tex2t")
-[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
-[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
+			const md: string = `[hello2]([[macro:getLink test="what"]] "test title tex2t")
+[macroWHashAndTitle]([[macro:getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[macro:getLink test="macro-hash"]]#ze-hash2)
 [hello](www.example.com "test title text")
 ![huh](www.example.com/test.png "test img title text")]
 [hello][wat]
@@ -144,7 +144,7 @@ allowfullscreen
 				}
 			};
 
-			const md: string = `[[greeting greeting="Hello" name="User"]]\n\t[[hello]] [[world]]`;
+			const md: string = `[[macro:greeting greeting="Hello" name="User"]]\n\t[[macro:hello]] [[macro:world]]`;
 
 			const rendered: string = await replaceMacrosInMd(md, macros);
 			assert.equal(

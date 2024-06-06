@@ -1,7 +1,7 @@
 import {replaceMacrosInMd, macros} from '@lzilioli/md-macros';
 
 export async function replaceMacrosInMdUsageExample(): Promise<void> {
-    const md: string = `Hello [[youtube url="<youtube embed url>"]]`;
+    const md: string = `Hello [[macro:youtube url="<youtube embed url>"]]`;
 
     const rendered: string = await replaceMacrosInMd(md, {youtube: macros.youtube});
 
@@ -26,5 +26,5 @@ export async function replaceMacrosInMdUsageExample(): Promise<void> {
         ['*']
     );
     console.log(renderedWithSkipped);
-    // Hello [[youtube url="<youtube embed url>"]]
+    // Hello [[macro:outube url="<youtube embed url>"]]
 }

@@ -83,7 +83,7 @@ allowfullscreen
 				}
 			})
 			const path: string = 'test/test.md';
-			const fileInline: string = `[[inlineFile path="${path}"]]`;
+			const fileInline: string = `[[macro:inlineFile path="${path}"]]`;
 			const mdBeforeInline: string = 'What it to babeyyyyyy ';
 			const mdAfterInline: string = 'Its pickle rickk!';
 			const mdText: string = `${mdBeforeInline}${fileInline}${mdAfterInline}`;
@@ -104,11 +104,11 @@ allowfullscreen
 
 This is a short document, but it needs a
 
-[[mdToc]]
+[[macro:mdToc]]
 
 # Some Other Section
 
-This section contains uses another [[macro]], which remains untouched.
+This section contains uses another [[macro:macro]], which remains untouched.
 
 It doesnt do a whole lot, but its got a couple of sections.
 
@@ -152,7 +152,7 @@ title: A markown file with some front matter
 ---
 #aTag
 
-[[mdToc]]
+[[macro:mdToc]]
 
 # A heading
 
@@ -177,11 +177,11 @@ Boss`);
 
 This is a short document, but it needs a
 
-[[mdToc]]
+[[macro:mdToc]]
 
 # Some Other Section
 
-This section contains uses another [[macro]], which remains untouched.
+This section contains uses another [[macro:macro]], which remains untouched.
 
 It doesnt do a whole lot, but its got a couple of sections.
 
@@ -219,7 +219,7 @@ This is a short document, but it needs a
 
 # Some Other Section
 
-This section contains uses another [[macro]], which remains untouched.
+This section contains uses another [[macro:macro]], which remains untouched.
 
 It doesnt do a whole lot, but its got a couple of sections.
 

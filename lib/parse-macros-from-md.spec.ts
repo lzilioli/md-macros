@@ -17,7 +17,7 @@ const EMPTY_PARSE_RESULTS: ParsedMacros = {
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
 		it('works with no args', () => {
-			const macroText: string = `[[sampleMacro]]`;
+			const macroText: string = `[[macro:sampleMacro]]`;
 			const macros: ParsedMacros = parseMacrosFromMd(macroText);
 			assert.deepEqual(macros.custom, [{
 				name: 'sampleMacro',
@@ -27,7 +27,7 @@ export async function test(): Promise<void> {
 		});
 
 		it('works with a single macro with one arg', () => {
-			const macroText: string = `[[youtube url="test"]]`;
+			const macroText: string = `[[macro:youtube url="test"]]`;
 			const macros: ParsedMacros = parseMacrosFromMd(macroText);
 			assert.deepEqual(macros.custom, [{
 				name: 'youtube',
@@ -37,7 +37,7 @@ export async function test(): Promise<void> {
 		});
 
 		it('can parse multi-line arguments', () => {
-			const macroText: string = `[[youtube
+			const macroText: string = `[[macro:youtube
 				url="test"
 				arg1="val1"
 			]]`;
@@ -51,7 +51,7 @@ export async function test(): Promise<void> {
 
 		it('lets you escape macros', () => {
 			// eslint-disable-next-line no-useless-escape
-			const macroText: string = `\\[[youtube
+			const macroText: string = `\\[[macro:youtube
 				url="test"
 				arg1="val1"
 			]]`;
@@ -60,8 +60,8 @@ export async function test(): Promise<void> {
 		});
 
 		it('captures multiple macros', () => {
-			const macro0Text: string = `[[youtube url="test1"]]`;
-			const macro1Text: string = `[[youtube
+			const macro0Text: string = `[[macro:youtube url="test1"]]`;
+			const macro1Text: string = `[[macro:youtube
 				url="test2"
 				arg1="val1"
 			]]`;
@@ -139,7 +139,7 @@ test string ${macro1Text}
 
 		it('captures both types of macros together', () => {
 			const macro0Text: string = `![alt text](www.example.com/example.png "Title Text")`;
-			const macro1Text: string = `[[youtube
+			const macro1Text: string = `[[macro:youtube
 				url="test1"
 			]]`;
 			const md: string = `
@@ -486,9 +486,9 @@ Thank you for attending my talk.
 		});
 
 		it('captures links', () => {
-			const md: string = `[hello2]([[getLink test="what"]] "test title tex2t")
-[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
-[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
+			const md: string = `[hello2]([[macro:getLink test="what"]] "test title tex2t")
+[macroWHashAndTitle]([[macro:getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[macro:getLink test="macro-hash"]]#ze-hash2)
 [hello](www.example.com "test title text")
 ![huh](www.example.com/test.png "test img title text")]
 [hello][wat]
@@ -507,19 +507,19 @@ Thank you for attending my talk.
 					args: {
 						test: "what",
 					},
-					fullMatch: "[[getLink test=\"what\"]]",
+					fullMatch: "[[macro:getLink test=\"what\"]]",
 					name: "getLink",
 				}, {
 					args: {
 						test: "macro-hash-title",
 					},
-					fullMatch: "[[getLink test=\"macro-hash-title\"]]",
+					fullMatch: "[[macro:getLink test=\"macro-hash-title\"]]",
 					name: "getLink",
 				}, {
 					args: {
 						test: "macro-hash",
 					},
-					fullMatch: "[[getLink test=\"macro-hash\"]]",
+					fullMatch: "[[macro:getLink test=\"macro-hash\"]]",
 					name: "getLink",
 				}],
 				img: [{
@@ -562,22 +562,22 @@ Thank you for attending my talk.
 				},
 				links: [{
 					title: 'test title tex2t',
-					href: '[[getLink test="what"]]',
+					href: '[[macro:getLink test="what"]]',
 					altText: 'hello2',
 					isReferenceStyle: false,
-					fullMatch: `[hello2]([[getLink test="what"]] "test title tex2t")`
+					fullMatch: `[hello2]([[macro:getLink test="what"]] "test title tex2t")`
 				}, {
 					title: 'mht',
-					href: '[[getLink test="macro-hash-title"]]#ze-hash',
+					href: '[[macro:getLink test="macro-hash-title"]]#ze-hash',
 					altText: 'macroWHashAndTitle',
 					isReferenceStyle: false,
-					fullMatch: `[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")`
+					fullMatch: `[macroWHashAndTitle]([[macro:getLink test="macro-hash-title"]]#ze-hash "mht")`
 				}, {
 					title: '',
-					href: '[[getLink test="macro-hash"]]#ze-hash2',
+					href: '[[macro:getLink test="macro-hash"]]#ze-hash2',
 					altText: 'macroWHash',
 					isReferenceStyle: false,
-					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
+					fullMatch: `[macroWHash]([[macro:getLink test="macro-hash"]]#ze-hash2)`
 				}, {
 					title: 'test title text',
 					href: 'www.example.com',
@@ -708,8 +708,8 @@ Test file 1 contents #sample-4
 
 These should get excluded:
 
-[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")
-[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)
+[macroWHashAndTitle]([[macro:getLink test="macro-hash-title"]]#ze-hash "mht")
+[macroWHash]([[macro:getLink test="macro-hash"]]#ze-hash2)
 [Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)
 Hello this is the #3 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna
 but not #1: test but #what. is cool but should remove the period.`;
@@ -720,27 +720,27 @@ but not #1: test but #what. is cool but should remove the period.`;
 					args: {
 						test: "macro-hash-title",
 					},
-					fullMatch: "[[getLink test=\"macro-hash-title\"]]",
+					fullMatch: "[[macro:getLink test=\"macro-hash-title\"]]",
 					name: "getLink",
 				}, {
 					args: {
 						test: "macro-hash",
 					},
-					fullMatch: "[[getLink test=\"macro-hash\"]]",
+					fullMatch: "[[macro:getLink test=\"macro-hash\"]]",
 					name: "getLink",
 				}],
 				links: [{
 					title: 'mht',
-					href: '[[getLink test="macro-hash-title"]]#ze-hash',
+					href: '[[macro:getLink test="macro-hash-title"]]#ze-hash',
 					altText: 'macroWHashAndTitle',
 					isReferenceStyle: false,
-					fullMatch: `[macroWHashAndTitle]([[getLink test="macro-hash-title"]]#ze-hash "mht")`
+					fullMatch: `[macroWHashAndTitle]([[macro:getLink test="macro-hash-title"]]#ze-hash "mht")`
 				}, {
 					title: '',
-					href: '[[getLink test="macro-hash"]]#ze-hash2',
+					href: '[[macro:getLink test="macro-hash"]]#ze-hash2',
 					altText: 'macroWHash',
 					isReferenceStyle: false,
-					fullMatch: `[macroWHash]([[getLink test="macro-hash"]]#ze-hash2)`
+					fullMatch: `[macroWHash]([[macro:getLink test="macro-hash"]]#ze-hash2)`
 				}, {
 					altText: "Sublime Text's multiple selections feature",
 					fullMatch: "[Sublime Text's multiple selections feature](https://www.sublimetext.com#multiple-selections)",
@@ -786,12 +786,12 @@ but not #1: test but #what. is cool but should remove the period.`;
 				}, {
 					tag: "#1stunna",
 					fullMatch: " #1stunna",
-					index: 503,
+					index: 515,
 					length: 9,
 				}, {
 					tag: "#what",
 					fullMatch: " #what",
-					index: 533,
+					index: 545,
 					length: 6,
 				}]
 			};
@@ -809,6 +809,39 @@ but not #1: test but #what. is cool but should remove the period.`;
 					index: 0,
 					length: 5,
 				}]
+			};
+			assert.deepEqual(macros, expected);
+		});
+
+		it('can differentiate between wiki-style links and macro calls', () => {
+			const md: string = `[[this is a wiki link]]
+[[this is a wiki link|So is this]]
+[[this is a wiki link#toasection|This one links to a section]]
+`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			console.log(JSON.stringify(macros, null, 2));
+			const expected: ParsedMacros = {
+				...EMPTY_PARSE_RESULTS,
+				custom: [],
+				links: [{
+					altText: 'this is a wiki link',
+					fullMatch: '[[this is a wiki link]]',
+					href: 'this is a wiki link',
+					isReferenceStyle: false,
+					title: '',
+				}, {
+					altText: 'So is this',
+					fullMatch: '[[this is a wiki link|So is this]]',
+					href: 'this is a wiki link',
+					isReferenceStyle: false,
+					title: 'So is this',
+				}, {
+					altText: 'This one links to a section',
+					fullMatch: '[[this is a wiki link#toasection|This one links to a section]]',
+					href: 'this is a wiki link#toasection',
+					isReferenceStyle: false,
+					title: 'This one links to a section',
+				}],
 			};
 			assert.deepEqual(macros, expected);
 		});

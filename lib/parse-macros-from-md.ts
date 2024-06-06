@@ -56,7 +56,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		});
 	}
 
-	const macroRegex: RegExp = /[\\]{0,1}\[\[((?:[\n]|[^\]])+)\]\]/gm;
+	const macroRegex: RegExp = /[\\]{0,1}\[\[macro:((?:[\n]|[^\]])+)\]\]/gm;
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;

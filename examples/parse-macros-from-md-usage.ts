@@ -7,7 +7,7 @@ Hello #tag
 [Link](/home)
 Here is some inline code \`code\`
 
-YouTube macro: [[youtube url="<youtube embed url>"]]
+YouTube macro: [[macro:youtube url="<youtube embed url>"]]
 
 Image: ![alt text](www.example.com/example.png "Title Text")
 

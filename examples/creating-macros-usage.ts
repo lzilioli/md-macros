@@ -10,8 +10,8 @@ export async function creatingMacrosUsageExample(): Promise<void> {
             // the second argument to the macro
             console.log(mdText);
             /*
-                [[greeting greeting="Hello" name="User"]]
-                    [[hello]] [[world]]
+                [[macro:greeting greeting="Hello" name="User"]]
+                    [[macro:hello]] [[macro:world]]
              */
             return Promise.resolve('world');
         },
@@ -28,8 +28,8 @@ export async function creatingMacrosUsageExample(): Promise<void> {
         }
     }
 
-    const md: string = `[[greeting greeting="Hello" name="User"]]
-    [[hello]] [[world]]`;
+    const md: string = `[[macro:greeting greeting="Hello" name="User"]]
+    [[macro:hello]] [[macro:world]]`;
 
     await replaceMacrosInMd(md, macros)
     .then((rendered: string) => {

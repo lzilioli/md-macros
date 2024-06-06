@@ -37,8 +37,8 @@ export async function test(): Promise<void> {
                 assert.deepEqual(
                     loggedOutput,
                     [
-                        [`[[greeting greeting="Hello" name="User"]]
-    [[hello]] [[world]]`],
+                        [`[[macro:greeting greeting="Hello" name="User"]]
+    [[macro:hello]] [[macro:world]]`],
                         [ true ],
                         [ `Hello, User:
     hello world` ]
@@ -54,7 +54,7 @@ export async function test(): Promise<void> {
                         loggedOutput,
                         [
                             [`Hello <iframe\nwidth="560"\nheight="315"\nsrc="<youtube embed url>"\nframeborder="0"\nallowfullscreen\n></iframe>`],
-                            [`Hello [[youtube url="<youtube embed url>"]]`]
+                            [`Hello [[macro:youtube url="<youtube embed url>"]]`]
                         ]
                         )
                     });
