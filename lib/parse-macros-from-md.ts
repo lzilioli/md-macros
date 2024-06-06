@@ -1,4 +1,4 @@
-import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask } from '@lib/typedefs';
+import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask, WikiLink } from '@lib/typedefs';
 import * as cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
 import { isArray, isUndefined, last, some } from 'lodash';
@@ -27,6 +27,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const custom: Macro[] = [];
 	const img: ParsedImage[] = [];
 	const links: ParsedLink[] = [];
+	const wikiLinks: WikiLink[] = [];
 	const references: ParsedReferences = {};
 	const tags: ParsedTag[] = [];
 	const headers: ParsedHeader[] = parseHeadersFromMd(md);
@@ -57,6 +58,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	}
 
 	const macroRegex: RegExp = /[\\]{0,1}\[\[macro:((?:[\n]|[^\]])+)\]\]/gm;
+	const wikiLinkRegex: RegExp = /\[\[(?!macro:)([^\]|#]+)(?:#([^\]|]+))?(?:\|([^\]|]+))?\]\]/g;
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
@@ -330,6 +332,23 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		selfReferenceMatch = selfReferenceRegex.exec(md);
 	}
 
+	let wikiLinkMatch: RegExpExecArray | null;
+	while ((wikiLinkMatch = wikiLinkRegex.exec(md)) !== null) {
+		// Extract target, header, and title from regex match groups
+		const targetName: string = wikiLinkMatch[1];
+		const header: string = wikiLinkMatch[2] || '';
+		const title: string = wikiLinkMatch[3] || targetName;
+		const fullMatch: string = wikiLinkMatch[0];
+
+		// Push parsed wiki link objects to the wikiLinks array
+		wikiLinks.push({
+			targetName,
+			header,
+			title,
+			fullMatch
+		});
+	}
+
 	let tagsMatch: RegExpExecArray = tagRegex.exec(md);
 	while(tagsMatch) {
 		// regex has 2 groups, one for start of string, another for preceded by
@@ -367,6 +386,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		img,
 		references,
 		links,
+		wikiLinks,
 		codeBlocks,
 		tags,
 		tasks,

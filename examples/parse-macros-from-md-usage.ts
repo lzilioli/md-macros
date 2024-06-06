@@ -24,6 +24,13 @@ Image: ![alt text](www.example.com/example.png "Title Text")
 - [ ] Nice!
 
 [link1]: https://www.example.com
+
+# Wiki Links!
+
+[[Link Target#header|Title Text]]
+[[Link Target]]
+[[Link Target#header]]
+[[Link Target|Title Text]]
     `;
 
     const EXPECTED_PARSED_MACROS: ParsedMacros = parseMacrosFromMd(md);

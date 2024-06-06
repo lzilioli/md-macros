@@ -17,6 +17,7 @@ export interface ParsedMacros {
 	quotes: ParsedBlockQuote[];
 	headers: ParsedHeader[];
 	tasks: ParsedTask[];
+	wikiLinks: WikiLink[];
 }
 
 export interface ParsedImage {
@@ -35,6 +36,17 @@ export interface ParsedLink {
 	fullMatch: string;
 	isReferenceStyle: boolean;
 	referenceKey?: string;
+}
+
+export interface WikiLink {
+	// [[Link Target#header|Title Text]]
+	// [[Link Target]]
+	// [[Link Target#header]]
+	// [[Link Target|Title Text]]
+	targetName: string; // in this example, "Link Target"
+	header: string | ''; // in some of the above examples, "header"
+	title: string | ''; // in some of the above examples, "Title Text"
+	fullMatch: string; // the full match of the wiki link
 }
 
 export interface ParsedReferences {

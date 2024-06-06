@@ -1,18 +1,7 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
 import { ParsedBlock, ParsedCodeBlock, ParsedMacros } from "./entries";
-
-const EMPTY_PARSE_RESULTS: ParsedMacros = {
-	custom: [],
-	quotes: [],
-	img: [],
-	references: {},
-	links: [],
-	codeBlocks: [],
-	tags: [],
-	tasks: [],
-	headers: [],
-};
+import { EMPTY_PARSE_RESULTS } from '@lib/EMPTY_PARSE_RESULTS';
 
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
@@ -1012,6 +1001,26 @@ Ahh. Thats right.
 		console.log(JSON.stringify(macros, null, 2));
 		const expected: ParsedMacros = {
 			...EMPTY_PARSE_RESULTS,
+			wikiLinks: [
+				{
+					"targetName": "this is a wiki link",
+					"header": "",
+					"title": "this is a wiki link",
+					"fullMatch": "[[this is a wiki link]]"
+				},
+				{
+					"targetName": "this is a wiki link",
+					"header": "",
+					"title": "So is this",
+					"fullMatch": "[[this is a wiki link|So is this]]"
+				},
+				{
+					"targetName": "this is a wiki link",
+					"header": "toasection",
+					"title": "This one links to a section",
+					"fullMatch": "[[this is a wiki link#toasection|This one links to a section]]"
+				}
+			],
 		};
 		assert.deepEqual(macros, expected);
 	});

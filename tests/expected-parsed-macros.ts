@@ -1,6 +1,8 @@
 import { ParsedMacros } from '@lib/typedefs';
+import { EMPTY_PARSE_RESULTS } from '@lib/EMPTY_PARSE_RESULTS';
 
 export const EXPECTED_PARSED_MACROS: ParsedMacros = {
+    ...EMPTY_PARSE_RESULTS,
     custom: [{
         name: 'youtube',
         args: { url: '<youtube embed url>' },
@@ -20,6 +22,13 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         level: 1,
         line: 18,
         text: "Multiple lists per note",
+    }, {
+        "content": "# Wiki Links!",
+        "index": 363,
+        "length": 13,
+        "level": 1,
+        "line": 24,
+        "text": "Wiki Links!",
     }],
     img: [{
         isReferenceStyle: false,
@@ -50,6 +59,32 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         referenceKey: "link1",
         title: "Reference style link",
     }],
+    wikiLinks: [
+    {
+        "fullMatch": "[[Link Target#header|Title Text]]",
+        "header": "header",
+        "targetName": "Link Target",
+        "title": "Title Text",
+    },
+    {
+        "fullMatch": "[[Link Target]]",
+        "header": "",
+        "targetName": "Link Target",
+        "title": "Link Target",
+    },
+    {
+        "fullMatch": "[[Link Target#header]]",
+        "header": "header",
+        "targetName": "Link Target",
+        "title": "Link Target",
+    },
+    {
+        "fullMatch": "[[Link Target|Title Text]]",
+        "header": "",
+        "targetName": "Link Target",
+        "title": "Title Text",
+    }
+    ],
     codeBlocks: [{
         content: '`code`',
         type: 'inline',
