@@ -8,6 +8,7 @@ Extensible macro processing framework for markdown, written in TypeScript.
 # Table of Contents
 
 -   [md-macros](#md-macros)
+    -   [Breaking changes in v7.0.0](#breaking-changes-in-v-7-0-0)
 -   [Overview](#overview)
     -   [Sample Use Case](#sample-use-case)
 -   [Usage](#usage)
@@ -26,6 +27,16 @@ Extensible macro processing framework for markdown, written in TypeScript.
                 -   [inlineFile](#inline-file)
                     -   [args](#args)
 -   [Custom macros](#custom-macros)
+
+
+## Breaking changes in v7.0.0
+
+In order to call a macro, you must now precede the text with `macro:`. e.g.
+`\\[[youtube url="url"]]` must now be written as `\\[[macro:youtube url="url"]]`.
+
+This is so that we can add support for parsing of wiki-style linking in the future,
+and so that the macro system does not collide with common markdown applications,
+which use wiki-style linking.
 
 # Overview
 

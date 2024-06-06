@@ -813,39 +813,6 @@ but not #1: test but #what. is cool but should remove the period.`;
 			assert.deepEqual(macros, expected);
 		});
 
-		it('can differentiate between wiki-style links and macro calls', () => {
-			const md: string = `[[this is a wiki link]]
-[[this is a wiki link|So is this]]
-[[this is a wiki link#toasection|This one links to a section]]
-`;
-			const macros: ParsedMacros = parseMacrosFromMd(md);
-			console.log(JSON.stringify(macros, null, 2));
-			const expected: ParsedMacros = {
-				...EMPTY_PARSE_RESULTS,
-				custom: [],
-				links: [{
-					altText: 'this is a wiki link',
-					fullMatch: '[[this is a wiki link]]',
-					href: 'this is a wiki link',
-					isReferenceStyle: false,
-					title: '',
-				}, {
-					altText: 'So is this',
-					fullMatch: '[[this is a wiki link|So is this]]',
-					href: 'this is a wiki link',
-					isReferenceStyle: false,
-					title: 'So is this',
-				}, {
-					altText: 'This one links to a section',
-					fullMatch: '[[this is a wiki link#toasection|This one links to a section]]',
-					href: 'this is a wiki link#toasection',
-					isReferenceStyle: false,
-					title: 'This one links to a section',
-				}],
-			};
-			assert.deepEqual(macros, expected);
-		});
-
 		it('skips over tags within blockquotes', () => {
 			const md: string = `# Hello
 
@@ -1032,6 +999,19 @@ Ahh. Thats right.
 				length: 11,
 				type: "inline",
 			}],
+		};
+		assert.deepEqual(macros, expected);
+	});
+
+	it('does not parse out wiki-style links as macros', () => {
+		const md: string = `[[this is a wiki link]]
+[[this is a wiki link|So is this]]
+[[this is a wiki link#toasection|This one links to a section]]
+`;
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		console.log(JSON.stringify(macros, null, 2));
+		const expected: ParsedMacros = {
+			...EMPTY_PARSE_RESULTS,
 		};
 		assert.deepEqual(macros, expected);
 	});

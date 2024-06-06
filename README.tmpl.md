@@ -7,6 +7,16 @@ Extensible macro processing framework for markdown, written in TypeScript.
 
 [[macro:mdToc]]
 
+
+## Breaking changes in v7.0.0
+
+In order to call a macro, you must now precede the text with `macro:`. e.g.
+`\\[[youtube url="url"]]` must now be written as `\\[[macro:youtube url="url"]]`.
+
+This is so that we can add support for parsing of wiki-style linking in the future,
+and so that the macro system does not collide with common markdown applications,
+which use wiki-style linking.
+
 # Overview
 
 There have been lots of requests and proposals over the years for an official spec for a rich and extensible version of markdown. People want to be able to write clean and succinct text in their markdown files, and have it rendered into complex html components, without the need for  inline html in their markdown files.
