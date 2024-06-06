@@ -995,6 +995,7 @@ Ahh. Thats right.
 	it('does not parse out wiki-style links as macros', () => {
 		const md: string = `[[this is a wiki link]]
 [[this is a wiki link|So is this]]
+[[this is a wiki link#To A Section|This one links to a section]]
 [[this is a wiki link#toasection|This one links to a section]]
 `;
 		const macros: ParsedMacros = parseMacrosFromMd(md);
@@ -1013,6 +1014,12 @@ Ahh. Thats right.
 					"header": "",
 					"title": "So is this",
 					"fullMatch": "[[this is a wiki link|So is this]]"
+				},
+				{
+					"targetName": "this is a wiki link",
+					"header": "To A Section",
+					"title": "This one links to a section",
+					"fullMatch": "[[this is a wiki link#To A Section|This one links to a section]]"
 				},
 				{
 					"targetName": "this is a wiki link",
