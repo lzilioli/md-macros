@@ -102,30 +102,30 @@ allowfullscreen
 			};
 
 			// Test without quotes - should parse as boolean true
-			const withoutQuotes = await replaceMacrosInMd('[[macro:test flag=true]]', {
+			const withoutQuotes: string = await replaceMacrosInMd('[[macro:test flag=true]]', {
 				test: testMacro
 			});
 			assert.strictEqual(withoutQuotes, 'flag=true type=boolean');
 
 			// Test with quotes - should also parse as boolean true
-			const withQuotes = await replaceMacrosInMd('[[macro:test flag="true"]]', {
+			const withQuotes: string = await replaceMacrosInMd('[[macro:test flag="true"]]', {
 				test: testMacro
 			});
 			assert.strictEqual(withQuotes, 'flag=true type=boolean');
 
 			// Test false values
-			const falseWithoutQuotes = await replaceMacrosInMd('[[macro:test flag=false]]', {
+			const falseWithoutQuotes: string = await replaceMacrosInMd('[[macro:test flag=false]]', {
 				test: testMacro
 			});
 			assert.strictEqual(falseWithoutQuotes, 'flag=false type=boolean');
 
-			const falseWithQuotes = await replaceMacrosInMd('[[macro:test flag="false"]]', {
+			const falseWithQuotes: string = await replaceMacrosInMd('[[macro:test flag="false"]]', {
 				test: testMacro
 			});
 			assert.strictEqual(falseWithQuotes, 'flag=false type=boolean');
 
 			// Test non-boolean string values remain strings
-			const stringValue = await replaceMacrosInMd('[[macro:test flag="other"]]', {
+			const stringValue: string = await replaceMacrosInMd('[[macro:test flag="other"]]', {
 				test: testMacro
 			});
 			assert.strictEqual(stringValue, 'flag=other type=string');

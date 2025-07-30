@@ -185,7 +185,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				.trim();
 		}
 		const $: cheerio.CheerioAPI = cheerio.load(`<div ${argsString}></div>`);
-		const rawArgs = $('div').attr();
+		const rawArgs: {[key: string]: string} | undefined = $('div').attr();
 		
 		// Coerce boolean string values to actual booleans
 		const args: unknown = {};
