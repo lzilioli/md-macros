@@ -13,8 +13,6 @@ if [ $? -eq 0 ]
 then
 	# failIfChanges 'Please do not commit code with uncommitted changes. Commit or stash and try again.'
 	# Working directory clean
-	gulp todo
-	git add TODO.md
 	npm run update-readme &&
 	git add README.md
 else

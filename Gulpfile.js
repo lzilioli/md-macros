@@ -1,15 +1,15 @@
 const _ = require('lodash');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
-const clean = require('gulp-rimraf');
-const eslint = require('gulp-eslint');
-const todo = require('gulp-todo');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
+const eslint = require('gulp-eslint-new');
 const webpack = require('webpack-stream');
 const webpackConfig = require('./webpack.config.js');
 
-gulp.task('clean', () => {
-	return gulp.src(['./dist', './build'], {allowEmpty: true})
-        .pipe(clean());
+gulp.task('clean', async () => {
+	await execAsync('rm -rf ./dist ./build');
 });
 
 function fetchWebpackTasks(watch) {
@@ -71,18 +71,6 @@ gulp.task('lint', () => {
 		.pipe(eslint.failAfterError());
 });
 
-gulp.task('todo', () => {
-    return gulp.src([
-		'**/*.js',
-		'**/*.ts',
-		'!node_modules/**',
-		'!build/**',
-		'!dist/**',
-	])
-	.pipe(todo())
-	.pipe(gulp.dest('./'));
-	// -> Will output a TODO.md with your todos
-});
 
 gulp.task('install-githooks', gulp.parallel([
 	()=>{

@@ -39,7 +39,6 @@ export async function test(): Promise<void> {
 		});
 
 		it('lets you escape macros', () => {
-			// eslint-disable-next-line no-useless-escape
 			const macroText: string = `\\[[macro:youtube
 				url="test"
 				arg1="val1"
