@@ -185,9 +185,19 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				.trim();
 		}
 		const $: cheerio.CheerioAPI = cheerio.load(`<div ${argsString}></div>`);
-		const args: unknown = {
-			...$('div').attr()
-		};
+		const rawArgs = $('div').attr();
+		
+		// Coerce boolean string values to actual booleans
+		const args: unknown = {};
+		for (const [key, value] of Object.entries(rawArgs || {})) {
+			if (value === 'true') {
+				args[key] = true;
+			} else if (value === 'false') {
+				args[key] = false;
+			} else {
+				args[key] = value;
+			}
+		}
 		custom.push({
 			name,
 			args,
