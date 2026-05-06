@@ -4,3 +4,6 @@ npm-debug.log
 *.ignore
 dist/
 build/
+.claude/*local*
+.claude/*.lock
+.claude/worktrees
