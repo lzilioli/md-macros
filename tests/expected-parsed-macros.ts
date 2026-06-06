@@ -63,26 +63,34 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
     {
         "fullMatch": "[[Link Target#header|Title Text]]",
         "header": "header",
+        "blockId": "",
         "targetName": "Link Target",
         "title": "Title Text",
+        "isEmbed": false,
     },
     {
         "fullMatch": "[[Link Target]]",
         "header": "",
+        "blockId": "",
         "targetName": "Link Target",
         "title": "Link Target",
+        "isEmbed": false,
     },
     {
         "fullMatch": "[[Link Target#header]]",
         "header": "header",
+        "blockId": "",
         "targetName": "Link Target",
         "title": "Link Target",
+        "isEmbed": false,
     },
     {
         "fullMatch": "[[Link Target|Title Text]]",
         "header": "",
+        "blockId": "",
         "targetName": "Link Target",
         "title": "Title Text",
+        "isEmbed": false,
     }
     ],
     codeBlocks: [{

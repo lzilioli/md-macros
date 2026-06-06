@@ -58,7 +58,13 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	}
 
 	const macroRegex: RegExp = /[\\]{0,1}\[\[macro:((?:[\n]|[^\]])+)\]\]/gm;
-	const wikiLinkRegex: RegExp = /\[\[(?!macro:)([^\]|#]+)(?:#([^\]|]+))?(?:\|([^\]|]+))?\]\]/g;
+	// Obsidian wiki links, every form. Groups:
+	//   1: leading "!" (embed/transclusion) or ""
+	//   2: target name (may be "" for same-note links like [[#header]])
+	//   3: "^" when the "#..." part is a block reference, otherwise undefined
+	//   4: the header text, or the block id (when group 3 is "^")
+	//   5: the explicit |title (alias), if any
+	const wikiLinkRegex: RegExp = /(!?)\[\[(?!macro:)([^\]|#]*)(?:#(\^)?([^\]|]+))?(?:\|([^\]|]+))?\]\]/g;
 	const inlineImgOrLinkRegex: RegExp = /!{0,1}\[([^\]]*)\]\(([^)]+)\)/gm;
 	const inlineImgPartsRexex: RegExp = /\[([^\]]*)\]\(([^)]+)\)/g;
 	const referenceValsRegex: RegExp = /\[([^\]]+)\]:\s(.*)/gm;
@@ -231,10 +237,11 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			src = split.shift();
 			title = split.join(' ').trim();
 		}
+		// Obsidian/CommonMark-lenient: strip wrapping quotes when present, but keep
+		// an unquoted title verbatim rather than throwing. A single malformed title
+		// must never abort parsing the entire document.
 		if (title.length && title.startsWith('"') && title.endsWith('"')) {
 			title = title.substr(1, title.length - 2);
-		} else if (title.length) {
-			throw new Error(`image or link title should be wrapped in double quotes: ${title}`)
 		}
 		if (fullMatch.startsWith('!')) {
 			img.push({
@@ -269,19 +276,20 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			const split: string[] = urlAndTitle.split(' ');
 			const value: string = split.shift();
 			let title: string = split.join(' ').trim();
+			// Lenient (see inline image/link titles above): keep an unquoted
+			// reference title verbatim instead of throwing.
 			if (title.length && title.startsWith('"') && title.endsWith('"')) {
 				title = title.substr(1, title.length - 2);
-			} else if (title.length) {
-				throw new Error(`referenece title should be wrapped in double quotes: ${title}`)
 			}
-			if (references[refKey]) {
-				throw new Error(`duplicate reference key encountered ${refKey}`);
+			// First definition wins (CommonMark behaviour); a duplicate key is
+			// ignored rather than aborting the parse.
+			if (!references[refKey]) {
+				references[refKey] = {
+					value,
+					fullMatch,
+					title
+				};
 			}
-			references[refKey] = {
-				value,
-				fullMatch,
-				title
-			};
 		}
 		referencesMatch = referenceValsRegex.exec(md);
 	}
@@ -344,17 +352,30 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 
 	let wikiLinkMatch: RegExpExecArray | null;
 	while ((wikiLinkMatch = wikiLinkRegex.exec(md)) !== null) {
-		// Extract target, header, and title from regex match groups
-		const targetName: string = wikiLinkMatch[1];
-		const header: string = wikiLinkMatch[2] || '';
-		const title: string = wikiLinkMatch[3] || targetName;
+		const isEmbed: boolean = wikiLinkMatch[1] === '!';
+		const targetName: string = wikiLinkMatch[2] || '';
+		const isBlockRef: boolean = wikiLinkMatch[3] === '^';
+		const headerOrBlock: string = wikiLinkMatch[4] || '';
+		const header: string = isBlockRef ? '' : headerOrBlock;
+		const blockId: string = isBlockRef ? headerOrBlock : '';
+		const explicitTitle: string = wikiLinkMatch[5] || '';
 		const fullMatch: string = wikiLinkMatch[0];
 
-		// Push parsed wiki link objects to the wikiLinks array
+		// Skip a degenerate "[[]]" with nothing inside it.
+		if (!targetName && !header && !blockId) {
+			continue;
+		}
+
+		// Title falls back to the target; for same-note links ([[#header]] /
+		// [[#^block]]) there is no target, so fall back to the header/block id.
+		const title: string = explicitTitle || targetName || header || blockId;
+
 		wikiLinks.push({
 			targetName,
 			header,
+			blockId,
 			title,
+			isEmbed,
 			fullMatch
 		});
 	}

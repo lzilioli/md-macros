@@ -8,7 +8,11 @@ module.exports = merge.merge([
 	require('./util/webpack.base.js'),
 	{
 		target: 'node',
-		externals: [nodeExternals()],
+		// Bundle (don't externalize) @lzilioli/md-macros so the alias below points
+		// it at the LOCAL source. Otherwise nodeExternals leaves it as a runtime
+		// require() that resolves to the stale published copy in node_modules, and
+		// the example tests would validate that instead of the code we're shipping.
+		externals: [nodeExternals({ allowlist: ['@lzilioli/md-macros'] })],
 		entry: getWebpackEntryMap(appPaths.testsFolder),
 		output: {
 			path: path.resolve(path.join(appPaths.buildFolder, appPaths.testsFolder)),

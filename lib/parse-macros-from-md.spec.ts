@@ -998,36 +998,142 @@ Ahh. Thats right.
 [[this is a wiki link#toasection|This one links to a section]]
 `;
 		const macros: ParsedMacros = parseMacrosFromMd(md);
-		console.log(JSON.stringify(macros, null, 2));
 		const expected: ParsedMacros = {
 			...EMPTY_PARSE_RESULTS,
 			wikiLinks: [
 				{
 					"targetName": "this is a wiki link",
 					"header": "",
+					"blockId": "",
 					"title": "this is a wiki link",
+					"isEmbed": false,
 					"fullMatch": "[[this is a wiki link]]"
 				},
 				{
 					"targetName": "this is a wiki link",
 					"header": "",
+					"blockId": "",
 					"title": "So is this",
+					"isEmbed": false,
 					"fullMatch": "[[this is a wiki link|So is this]]"
 				},
 				{
 					"targetName": "this is a wiki link",
 					"header": "To A Section",
+					"blockId": "",
 					"title": "This one links to a section",
+					"isEmbed": false,
 					"fullMatch": "[[this is a wiki link#To A Section|This one links to a section]]"
 				},
 				{
 					"targetName": "this is a wiki link",
 					"header": "toasection",
+					"blockId": "",
 					"title": "This one links to a section",
+					"isEmbed": false,
 					"fullMatch": "[[this is a wiki link#toasection|This one links to a section]]"
 				}
 			],
 		};
 		assert.deepEqual(macros, expected);
+	});
+
+	it('parses a same-note header link ([[#header]]) with an empty target', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`See [[#Punchlines]] below.\n`);
+		assert.deepEqual(macros.wikiLinks, [{
+			targetName: '',
+			header: 'Punchlines',
+			blockId: '',
+			title: 'Punchlines',
+			isEmbed: false,
+			fullMatch: '[[#Punchlines]]',
+		}]);
+	});
+
+	it('parses a same-note header link with an explicit alias', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`Jump [[#Punchlines|to the jokes]].\n`);
+		assert.deepEqual(macros.wikiLinks, [{
+			targetName: '',
+			header: 'Punchlines',
+			blockId: '',
+			title: 'to the jokes',
+			isEmbed: false,
+			fullMatch: '[[#Punchlines|to the jokes]]',
+		}]);
+	});
+
+	it('parses a block reference ([[Target#^blockId]]) into blockId, not header', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`Ref [[My Note#^abc123]].\n`);
+		assert.deepEqual(macros.wikiLinks, [{
+			targetName: 'My Note',
+			header: '',
+			blockId: 'abc123',
+			title: 'My Note',
+			isEmbed: false,
+			fullMatch: '[[My Note#^abc123]]',
+		}]);
+	});
+
+	it('parses a block reference with an alias', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`[[My Note#^abc123|see this bit]]\n`);
+		assert.deepEqual(macros.wikiLinks, [{
+			targetName: 'My Note',
+			header: '',
+			blockId: 'abc123',
+			title: 'see this bit',
+			isEmbed: false,
+			fullMatch: '[[My Note#^abc123|see this bit]]',
+		}]);
+	});
+
+	it('parses an embed/transclusion (![[Target]]) with isEmbed true', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`![[Some Note]]\n[[diagram.png]]\n`);
+		assert.deepEqual(macros.wikiLinks, [
+			{
+				targetName: 'Some Note',
+				header: '',
+				blockId: '',
+				title: 'Some Note',
+				isEmbed: true,
+				fullMatch: '![[Some Note]]',
+			},
+			{
+				targetName: 'diagram.png',
+				header: '',
+				blockId: '',
+				title: 'diagram.png',
+				isEmbed: false,
+				fullMatch: '[[diagram.png]]',
+			},
+		]);
+	});
+
+	it('does not throw on an unquoted inline link title; keeps it verbatim and still parses the rest', () => {
+		const md: string = `[a link](http://example.com some title)\n\n[[Survivor]]\n`;
+		let macros: ParsedMacros;
+		assert.doesNotThrow((): void => {
+			macros = parseMacrosFromMd(md);
+		});
+		assert.equal(macros.links.length, 1);
+		assert.equal(macros.links[0].href, 'http://example.com');
+		assert.equal(macros.links[0].title, 'some title');
+		// The wiki link after the malformed link still parses (parse not aborted).
+		assert.deepEqual(macros.wikiLinks, [{
+			targetName: 'Survivor',
+			header: '',
+			blockId: '',
+			title: 'Survivor',
+			isEmbed: false,
+			fullMatch: '[[Survivor]]',
+		}]);
+	});
+
+	it('does not throw on duplicate reference keys; first definition wins', () => {
+		const md: string = `[ref]: http://first.com\n[ref]: http://second.com\n`;
+		let macros: ParsedMacros;
+		assert.doesNotThrow((): void => {
+			macros = parseMacrosFromMd(md);
+		});
+		assert.equal(macros.references['ref'].value, 'http://first.com');
 	});
 }
