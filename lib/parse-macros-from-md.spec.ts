@@ -1136,4 +1136,39 @@ Ahh. Thats right.
 		});
 		assert.equal(macros.references['ref'].value, 'http://first.com');
 	});
+
+	it('does not parse wiki links inside fenced code blocks', () => {
+		const md: string = [
+			'A real one: [[Real Note]]',
+			'',
+			'```js',
+			'const x = "[[" + file.path + "|" + file.name + "]]";',
+			'```',
+			'',
+		].join('\n');
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		assert.deepEqual(macros.wikiLinks.map((w: { targetName: string }): string => w.targetName), ['Real Note']);
+	});
+
+	it('strips the Obsidian \\| pipe-escape from target and header', () => {
+		const macros: ParsedMacros = parseMacrosFromMd(`[[Categories/_Index\\|Categories]] and [[Note#Section\\|Sec]]\n`);
+		assert.deepEqual(macros.wikiLinks, [
+			{
+				targetName: 'Categories/_Index',
+				header: '',
+				blockId: '',
+				title: 'Categories',
+				isEmbed: false,
+				fullMatch: '[[Categories/_Index\\|Categories]]',
+			},
+			{
+				targetName: 'Note',
+				header: 'Section',
+				blockId: '',
+				title: 'Sec',
+				isEmbed: false,
+				fullMatch: '[[Note#Section\\|Sec]]',
+			},
+		]);
+	});
 }

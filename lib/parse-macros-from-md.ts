@@ -351,11 +351,20 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	}
 
 	let wikiLinkMatch: RegExpExecArray | null;
+	// A trailing backslash is Obsidian's pipe-escape: [[A\|B]] means target "A"
+	// with alias "B" (the \ keeps the | out of e.g. a table cell). Strip it so
+	// the target/header resolve cleanly.
+	const stripPipeEscape: (value: string) => string = (value: string): string => value.replace(/\\$/, '');
 	while ((wikiLinkMatch = wikiLinkRegex.exec(md)) !== null) {
+		// Obsidian doesn't treat [[...]] inside fenced/inline code as links, so
+		// neither do we (e.g. a [[...]] string built inside a dataviewjs block).
+		if (isIndexWithinParsedBlocks(wikiLinkMatch.index, codeBlocks)) {
+			continue;
+		}
 		const isEmbed: boolean = wikiLinkMatch[1] === '!';
-		const targetName: string = wikiLinkMatch[2] || '';
+		const targetName: string = stripPipeEscape(wikiLinkMatch[2] || '');
 		const isBlockRef: boolean = wikiLinkMatch[3] === '^';
-		const headerOrBlock: string = wikiLinkMatch[4] || '';
+		const headerOrBlock: string = stripPipeEscape(wikiLinkMatch[4] || '');
 		const header: string = isBlockRef ? '' : headerOrBlock;
 		const blockId: string = isBlockRef ? headerOrBlock : '';
 		const explicitTitle: string = wikiLinkMatch[5] || '';
