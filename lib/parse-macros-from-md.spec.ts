@@ -801,13 +801,33 @@ but not #1: test but #what. is cool but should remove the period.`;
 			assert.deepEqual(macros, expected);
 		});
 
-		it('does not treat CSS hex colors as tags (but keeps real tags)', () => {
-			// A pasted stylesheet (not fenced) shouldn't flood the tag list with
-			// its hex colors, while a genuine adjacent tag still parses.
-			const md: string = `--interactive-normal: #8C62AA; --hover: #A082C4; short #fff alpha #11223344 real #ai-prompt`;
-			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const tagTexts: string[] = macros.tags.map((t: ParsedTag): string => t.tag);
-			assert.deepEqual(tagTexts, ['#ai-prompt'], `unexpected tags: ${JSON.stringify(tagTexts)}`);
+		// Helper: the tag texts parsed out of a string.
+		const tagsIn: (md: string) => string[] = (md: string): string[] =>
+			parseMacrosFromMd(md).tags.map((t: ParsedTag): string => t.tag);
+
+		it('rejects #tokens inside a fenced code block (CSS hex colors AND id selectors), by LOCATION not content', () => {
+			// A fenced stylesheet — hex colors (#8C62AA) and id selectors
+			// (#refresh-module-123) — must produce ZERO tags. A real tag in prose
+			// outside the fence still parses. This is the principled fix: location,
+			// not guessing at a token's shape.
+			const md: string = `Here is a real tag: #ai-prompt
+
+\`\`\`css
+#refresh-module-1939011389 .icon { background: #8C62AA; }
+.theme-dark { --hover: #A082C4; --field: #715A89; }
+\`\`\`
+`;
+			assert.deepEqual(tagsIn(md), ['#ai-prompt']);
+		});
+
+		it('keeps ordinary word tags in prose — including ones that happen to look like hex (#cafe, #decade)', () => {
+			// No content-based exclusion: we do NOT drop real words just because
+			// they're valid hex. (Unfenced CSS is fixed by fencing it, not by
+			// sniffing token contents.)
+			assert.deepEqual(
+				tagsIn('see #archive and #ai-prompt and #cafe and #decade'),
+				['#archive', '#ai-prompt', '#cafe', '#decade'],
+			);
 		});
 
 		it('skips over tags within blockquotes', () => {

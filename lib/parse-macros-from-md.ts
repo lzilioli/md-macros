@@ -406,17 +406,14 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			index++;
 		}
 		const isNumericalTag: boolean = /^#\d+$/gms.test(tagText);
-		// A CSS hex color (#RGB / #RGBA / #RRGGBB / #RRGGBBAA, optional trailing
-		// `;`) is not a tag — e.g. `#8C62AA` in a pasted stylesheet. The whole
-		// token must be pure hex of a valid color length, so real tags like
-		// `#archive` or `#ai-prompt` are unaffected.
-		const hexColorMatch: RegExpExecArray = /^#([0-9a-fA-F]+);?$/.exec(tagText);
-		const isHexColor: boolean = !!hexColorMatch && [3, 4, 6, 8].indexOf(hexColorMatch[1].length) > -1;
+		// Tags inside code blocks / blockquotes are not real tags (e.g. CSS hex
+		// colors and id selectors in a fenced stylesheet). We reject by LOCATION,
+		// never by guessing at the token's contents.
 		const isWithinBlocks: boolean = isIndexWithinParsedBlocks(index, [
 			...codeBlocks,
 			...blockQuotes
 		]);
-		if (!isNumericalTag && !isHexColor && !isWithinBlocks && tagText !== '#') {
+		if (!isNumericalTag && !isWithinBlocks && tagText !== '#') {
 			tags.push({
 				tag: tagText,
 				fullMatch,
