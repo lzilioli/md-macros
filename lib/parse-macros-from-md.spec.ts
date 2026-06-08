@@ -1,6 +1,6 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
-import { ParsedBlock, ParsedCodeBlock, ParsedMacros } from "./entries";
+import { ParsedBlock, ParsedCodeBlock, ParsedMacros, ParsedTag } from "./entries";
 import { EMPTY_PARSE_RESULTS } from '@lib/EMPTY_PARSE_RESULTS';
 
 export async function test(): Promise<void> {
@@ -799,6 +799,15 @@ but not #1: test but #what. is cool but should remove the period.`;
 				}]
 			};
 			assert.deepEqual(macros, expected);
+		});
+
+		it('does not treat CSS hex colors as tags (but keeps real tags)', () => {
+			// A pasted stylesheet (not fenced) shouldn't flood the tag list with
+			// its hex colors, while a genuine adjacent tag still parses.
+			const md: string = `--interactive-normal: #8C62AA; --hover: #A082C4; short #fff alpha #11223344 real #ai-prompt`;
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			const tagTexts: string[] = macros.tags.map((t: ParsedTag): string => t.tag);
+			assert.deepEqual(tagTexts, ['#ai-prompt'], `unexpected tags: ${JSON.stringify(tagTexts)}`);
 		});
 
 		it('skips over tags within blockquotes', () => {
