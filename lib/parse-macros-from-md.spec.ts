@@ -1179,6 +1179,25 @@ Ahh. Thats right.
 		assert.deepEqual(macros.wikiLinks.map((w: { targetName: string }): string => w.targetName), ['Real Note']);
 	});
 
+	it('does not catastrophically backtrack on many unclosed [[macro: openers', () => {
+		// A note that documents macro syntax contains lots of `[[macro:NAME`
+		// tokens with no closing `]]`. The old `(?:[\n]|[^\]])+` macro body made
+		// the regex explore an exponential number of partitions on this input and
+		// peg the CPU forever. The single-path `[^\]]+` body parses it instantly.
+		const openers: string = new Array(400)
+			.fill('  17 [[macro:postLink without a closing bracket on this line')
+			.join('\n');
+		const md: string = `# Heading\n\n${openers}\n`;
+		const start: number = Date.now();
+		const macros: ParsedMacros = parseMacrosFromMd(md);
+		const elapsedMs: number = Date.now() - start;
+		// Linear behaviour finishes in single-digit ms; the old form ran for
+		// minutes. A generous ceiling still fails loudly on a regression.
+		assert.ok(elapsedMs < 1000, `parse took ${elapsedMs}ms (catastrophic backtracking regression)`);
+		// No opener actually closes, so nothing is parsed as a macro.
+		assert.deepEqual(macros.custom, []);
+	});
+
 	it('strips the Obsidian \\| pipe-escape from target and header', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`[[Categories/_Index\\|Categories]] and [[Note#Section\\|Sec]]\n`);
 		assert.deepEqual(macros.wikiLinks, [

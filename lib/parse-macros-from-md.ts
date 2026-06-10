@@ -57,7 +57,14 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		});
 	}
 
-	const macroRegex: RegExp = /[\\]{0,1}\[\[macro:((?:[\n]|[^\]])+)\]\]/gm;
+	// The body group is `[^\]]+` (any run of non-`]` chars, newlines included —
+	// negated classes match `\n` without the `s` flag). It deliberately is NOT
+	// `(?:[\n]|[^\]])+`: that older form let `[\n]` and `[^\]]` both match a
+	// newline, so on input with many *unclosed* `[[macro:` openers (e.g. a note
+	// that documents macro syntax) the engine explored an exponential number of
+	// partitions and pegged the CPU forever (catastrophic backtracking). The
+	// single-path class matches the same text but in linear time.
+	const macroRegex: RegExp = /[\\]{0,1}\[\[macro:([^\]]+)\]\]/gm;
 	// Obsidian wiki links, every form. Groups:
 	//   1: leading "!" (embed/transclusion) or ""
 	//   2: target name (may be "" for same-note links like [[#header]])
