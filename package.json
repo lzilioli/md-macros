@@ -29,7 +29,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "commonmark": "0.31.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "minimatch": "^6.1.6"
   },
   "devDependencies": {
