@@ -38,6 +38,22 @@ export async function test(): Promise<void> {
 			}])
 		});
 
+		it('allows for arrays (for codeblocks)', () => {
+			const macroText: string = `This is a document.
+
+["yes", "no"]
+
+Ya know?
+`;
+			const macros: ParsedMacros = parseMacrosFromMd(macroText);
+			assert.deepEqual(macros, {
+				custom: [],
+				img: [],
+				links: [],
+				references: {},
+			});
+		});
+
 		it('lets you escape macros', () => {
 			const macroText: string = `\\[[macro:youtube
 				url="test"
