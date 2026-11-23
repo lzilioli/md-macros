@@ -10,5 +10,6 @@ export const EMPTY_PARSE_RESULTS: ParsedMacros = {
 	codeBlocks: [],
 	tags: [],
 	tasks: [],
+	lists: [],
 	headers: [],
 };

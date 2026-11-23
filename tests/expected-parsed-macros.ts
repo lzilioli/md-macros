@@ -35,7 +35,9 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         altText: "alt text",
         src: "www.example.com/example.png",
         title: "Title Text",
-        fullMatch: "![alt text](www.example.com/example.png \"Title Text\")"
+        fullMatch: "![alt text](www.example.com/example.png \"Title Text\")",
+        index: 127,
+        line: 8,
     }],
     quotes: [],
     references: {
@@ -51,6 +53,8 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         href: '/home',
         isReferenceStyle: false,
         title: "",
+        index: 13,
+        line: 3,
     }, {
         altText: "",
         fullMatch: "[Reference style link][link1]",
@@ -58,10 +62,14 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         isReferenceStyle: true,
         referenceKey: "link1",
         title: "Reference style link",
+        index: 182,
+        line: 10,
     }],
     wikiLinks: [
     {
         "fullMatch": "[[Link Target#header|Title Text]]",
+        "index": 378,
+        "line": 26,
         "header": "header",
         "blockId": "",
         "targetName": "Link Target",
@@ -70,6 +78,8 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
     },
     {
         "fullMatch": "[[Link Target]]",
+        "index": 412,
+        "line": 27,
         "header": "",
         "blockId": "",
         "targetName": "Link Target",
@@ -78,6 +88,8 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
     },
     {
         "fullMatch": "[[Link Target#header]]",
+        "index": 428,
+        "line": 28,
         "header": "header",
         "blockId": "",
         "targetName": "Link Target",
@@ -86,6 +98,8 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
     },
     {
         "fullMatch": "[[Link Target|Title Text]]",
+        "index": 451,
+        "line": 29,
         "header": "",
         "blockId": "",
         "targetName": "Link Target",
@@ -97,13 +111,16 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
         content: '`code`',
         type: 'inline',
         index: 46,
-        length: 6
+        length: 6,
+        line: 4,
+        endLine: 4,
     }],
     tags: [{
         fullMatch: ' #tag',
         index: 6,
         length: 5,
-        tag: '#tag'
+        tag: '#tag',
+        line: 1,
     }],
     tasks: [{
         completed: false,
@@ -173,5 +190,63 @@ export const EXPECTED_PARSED_MACROS: ParsedMacros = {
             line: 18,
             text: "Multiple lists per note",
         }
-    }]
+    }],
+    lists: [
+        {
+            "index": 226,
+            "length": 11,
+            "content": "- [ ] What?",
+            "line": 14,
+            "endLine": 14,
+            "column": 0,
+            "marker": "-",
+            "task": " ",
+            "parentLine": null,
+            "listLine": 14,
+            "listEndLine": 16,
+            "blockId": ""
+        },
+        {
+            "index": 238,
+            "length": 18,
+            "content": "- [X] This is cool",
+            "line": 15,
+            "endLine": 15,
+            "column": 0,
+            "marker": "-",
+            "task": "X",
+            "parentLine": null,
+            "listLine": 14,
+            "listEndLine": 16,
+            "blockId": ""
+        },
+        {
+            "index": 261,
+            "length": 26,
+            "content": "- [ ] This is a child task",
+            "line": 16,
+            "endLine": 16,
+            "column": 4,
+            "marker": "-",
+            "task": " ",
+            "parentLine": 15,
+            "listLine": 14,
+            "listEndLine": 16,
+            "blockId": ""
+        },
+        {
+            "index": 316,
+            "length": 11,
+            "content": "- [ ] Nice!",
+            "line": 20,
+            "endLine": 20,
+            "column": 0,
+            "marker": "-",
+            "task": " ",
+            "parentLine": null,
+            "listLine": 20,
+            "listEndLine": 20,
+            "blockId": ""
+        }
+    ],
 };

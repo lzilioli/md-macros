@@ -1,12 +1,98 @@
-import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask, WikiLink } from '@lib/typedefs';
+import { Macro, ParsedBlock, ParsedBlockQuote, ParsedCodeBlock, ParsedHeader, ParsedImage, ParsedLink, ParsedListItem, ParsedMacros, ParsedReferences, ParsedTag, ParsedTask, WikiLink } from '@lib/typedefs';
 import * as cheerio from 'cheerio';
 import * as commonmark from 'commonmark';
 import { isArray, isUndefined, last, some } from 'lodash';
-import { CodeBlockExtractor, ExtractorResults, getCodeBlockExtractor } from './static-tree-helpers';
+import { CodeBlockExtractor, ExtractorResults, getCodeBlockExtractor, UnplacedCodeBlock } from './static-tree-helpers';
 
 function isIndexWithinParsedBlocks(index: number, parsedBlocks: (ParsedBlock)[]): boolean {
 	return some(parsedBlocks, (block: (ParsedBlock)): boolean => {
 		return index >= block.index && index <= block.index + block.length;
+	});
+}
+
+/** Offsets where each line of `md` starts. */
+function lineStartsOf(md: string): number[] {
+	const starts: number[] = [0];
+	for (let i: number = 0; i < md.length; i++) {
+		if (md.charCodeAt(i) === 10) {
+			starts.push(i + 1);
+		}
+	}
+	return starts;
+}
+
+/** The 0-based line that the offset `index` is on. */
+function lineOfIndex(starts: number[], index: number): number {
+	let lo: number = 0;
+	let hi: number = starts.length - 1;
+	while (lo < hi) {
+		const mid: number = (lo + hi + 1) >> 1;
+		if (starts[mid] <= index) {
+			lo = mid;
+		} else {
+			hi = mid - 1;
+		}
+	}
+	return lo;
+}
+
+const LIST_MARKER: RegExp = /^([-*+]|\d{1,9}[.)])/;
+const TASK_BOX: RegExp = /^[ \t]+\[(.)\](?=[ \t]|$)/;
+const BLOCK_ID: RegExp = /(?:^|\s)\^([A-Za-z0-9-]+)[ \t]*$/;
+
+/** The last non-blank line from `first` to `last` (0-based); `first` when all the others are blank. */
+function lastNonBlankLine(splitMd: string[], first: number, last: number): number {
+	let line: number = last;
+	while (line > first && splitMd[line].trim() === '') {
+		line--;
+	}
+	return line;
+}
+
+/** List items from CommonMark's `item` nodes (positions are 1-based in `sourcepos`). */
+function parseListItems(itemNodes: commonmark.Node[], splitMd: string[], lineStarts: number[]): ParsedListItem[] {
+	return itemNodes.map((item: commonmark.Node): ParsedListItem => {
+		const line: number = item.sourcepos[0][0] - 1;
+		const column: number = item.sourcepos[0][1] - 1;
+		// The item's own text stops where its first nested list starts.
+		let endLine: number = item.sourcepos[1][0] - 1;
+		for (let child: commonmark.Node | null = item.firstChild; child; child = child.next) {
+			if (child.type === 'list') {
+				endLine = child.sourcepos[0][0] - 2;
+				break;
+			}
+		}
+		endLine = lastNonBlankLine(splitMd, line, endLine);
+		const first: string = splitMd[line].slice(column);
+		const markerMatch: RegExpExecArray | null = LIST_MARKER.exec(first);
+		if (!markerMatch) {
+			throw new Error(`md-macros: CommonMark reported a list item at line ${line + 1}, column ${column + 1}, but there is no list marker there`);
+		}
+		const taskMatch: RegExpExecArray | null = TASK_BOX.exec(first.slice(markerMatch[0].length));
+		const parentItem: commonmark.Node | null = item.parent ? item.parent.parent : null;
+		let outerList: commonmark.Node = item.parent;
+		for (let node: commonmark.Node | null = item.parent; node; node = node.parent) {
+			if (node.type === 'list') {
+				outerList = node;
+			}
+		}
+		const listLine: number = outerList.sourcepos[0][0] - 1;
+		const blockIdMatch: RegExpExecArray | null = BLOCK_ID.exec(splitMd[endLine]);
+		const content: string = splitMd.slice(line, endLine + 1).join('\n').slice(column);
+		return {
+			index: lineStarts[line] + column,
+			length: content.length,
+			content,
+			line,
+			endLine,
+			column,
+			marker: markerMatch[0],
+			task: taskMatch ? taskMatch[1] : null,
+			parentLine: parentItem && parentItem.type === 'item' ? parentItem.sourcepos[0][0] - 1 : null,
+			listLine,
+			listEndLine: lastNonBlankLine(splitMd, listLine, outerList.sourcepos[1][0] - 1),
+			blockId: blockIdMatch ? blockIdMatch[1] : '',
+		};
 	});
 }
 
@@ -31,6 +117,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	const references: ParsedReferences = {};
 	const tags: ParsedTag[] = [];
 	const headers: ParsedHeader[] = parseHeadersFromMd(md);
+	const lineStarts: number[] = lineStartsOf(md);
+	const listItemNodes: commonmark.Node[] = [];
 
 	// Markdown parser which will help us walk the tree
 	const reader: commonmark.Parser = new commonmark.Parser();
@@ -47,13 +135,29 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	// https://github.com/commonmark/commonmark.js#usage
 	while((event = walker.next())) {
 		node = event.node;
+		if (event.entering && node.type === 'item') {
+			listItemNodes.push(node);
+		}
 		if (typeof node.literal === 'string') {
 			index = md.indexOf(node.literal, index);
 		}
-		const codeBlockResults: ExtractorResults<ParsedCodeBlock> = codeBlockExtractor(index, event);
+		const codeBlockResults: ExtractorResults<UnplacedCodeBlock> = codeBlockExtractor(index, event);
 		index = codeBlockResults.index;
-		codeBlockResults.items.forEach((block: ParsedCodeBlock) => {
-			codeBlocks.push(block);
+		codeBlockResults.items.forEach((block: UnplacedCodeBlock) => {
+			if (block.type === 'block') {
+				// commonmark's source position covers the fences (1-based lines).
+				const sourcepos: [[number, number], [number, number]] | undefined = node.sourcepos;
+				if (!sourcepos) {
+					throw new Error(`Internal error: code block at offset ${block.index} has no source position`);
+				}
+				codeBlocks.push({ ...block, line: sourcepos[0][0] - 1, endLine: sourcepos[1][0] - 1 });
+			} else {
+				codeBlocks.push({
+					...block,
+					line: lineOfIndex(lineStarts, block.index),
+					endLine: lineOfIndex(lineStarts, block.index + block.length - 1),
+				});
+			}
 		});
 	}
 
@@ -91,6 +195,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	// necessary.
 
 	const splitMd: string[] = md.split('\n');
+	const lists: ParsedListItem[] = parseListItems(listItemNodes, splitMd, lineStarts);
 	let blockIdx: number = 0;
 	let curBlockQuote: string[] = [];
 	let curBlockQuoteStart: number = -1;
@@ -222,6 +327,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	let imageOrLinkMatch: RegExpExecArray = inlineImgOrLinkRegex.exec(md);
 	while (imageOrLinkMatch) {
 		const fullMatch: string = imageOrLinkMatch[0].trim();
+		const imageOrLinkIndex: number = imageOrLinkMatch.index + imageOrLinkMatch[0].indexOf(fullMatch);
 		inlineImgPartsRexex.lastIndex = 0;
 		const partsMatch: RegExpExecArray = inlineImgPartsRexex.exec(fullMatch);
 		const altText: string = partsMatch[1] || '';
@@ -256,7 +362,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				title,
 				altText,
 				fullMatch,
-				isReferenceStyle: false
+				isReferenceStyle: false,
+				index: imageOrLinkIndex,
+				line: lineOfIndex(lineStarts, imageOrLinkIndex),
 			});
 		} else {
 			links.push({
@@ -265,6 +373,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				altText,
 				fullMatch,
 				isReferenceStyle: false,
+				index: imageOrLinkIndex,
+				line: lineOfIndex(lineStarts, imageOrLinkIndex),
 			});
 		}
 		imageOrLinkMatch = inlineImgOrLinkRegex.exec(md);
@@ -306,6 +416,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		const fullMatch: string = referencesImgOrLinkMatch[0].trim();
 		const refText: string = referencesImgOrLinkMatch[1].trim();
 		const refKey: string = referencesImgOrLinkMatch[2].trim();
+		const referenceIndex: number = referencesImgOrLinkMatch.index + referencesImgOrLinkMatch[0].indexOf(fullMatch);
 		if (fullMatch.startsWith('!')) {
 			img.push({
 				src: (references[refKey] || {}).value,
@@ -313,7 +424,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				altText: '',
 				fullMatch,
 				isReferenceStyle: true,
-				referenceKey: refKey
+				referenceKey: refKey,
+				index: referenceIndex,
+				line: lineOfIndex(lineStarts, referenceIndex),
 			});
 		} else {
 			links.push({
@@ -322,7 +435,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				altText: '',
 				fullMatch,
 				isReferenceStyle: true,
-				referenceKey: refKey
+				referenceKey: refKey,
+				index: referenceIndex,
+				line: lineOfIndex(lineStarts, referenceIndex),
 			});
 		}
 		referencesImgOrLinkMatch = referenceImgOrLinkRegex.exec(md);
@@ -332,6 +447,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 	while (selfReferenceMatch) {
 		const fullMatch: string = selfReferenceMatch[0].trim();
 		const refKey: string = selfReferenceMatch[1].trim();
+		const selfReferenceIndex: number = selfReferenceMatch.index + selfReferenceMatch[0].indexOf(fullMatch);
 		if (fullMatch.startsWith('!')) {
 			img.push({
 				src: (references[refKey] || {}).value,
@@ -339,7 +455,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				altText: '',
 				fullMatch,
 				isReferenceStyle: true,
-				referenceKey: refKey
+				referenceKey: refKey,
+				index: selfReferenceIndex,
+				line: lineOfIndex(lineStarts, selfReferenceIndex),
 			});
 		} else if (fullMatch !== '[ ]' && fullMatch.toLowerCase() !== '[x]') {
 			const isWithinCodeBlocks: boolean = isIndexWithinParsedBlocks(selfReferenceMatch.index, codeBlocks);
@@ -350,7 +468,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 					altText: '',
 					fullMatch,
 					isReferenceStyle: true,
-					referenceKey: refKey
+					referenceKey: refKey,
+					index: selfReferenceIndex,
+					line: lineOfIndex(lineStarts, selfReferenceIndex),
 				});
 			}
 		}
@@ -392,7 +512,9 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 			blockId,
 			title,
 			isEmbed,
-			fullMatch
+			fullMatch,
+			index: wikiLinkMatch.index,
+			line: lineOfIndex(lineStarts, wikiLinkMatch.index),
 		});
 	}
 
@@ -425,7 +547,8 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 				tag: tagText,
 				fullMatch,
 				index,
-				length: fullMatch.length
+				length: fullMatch.length,
+				line: lineOfIndex(lineStarts, index),
 			});
 		}
 		tagsMatch = tagRegex.exec(md);
@@ -440,6 +563,7 @@ export function parseMacrosFromMd(md: string): ParsedMacros {
 		codeBlocks,
 		tags,
 		tasks,
+		lists,
 		quotes: blockQuotes,
 		headers,
 	};

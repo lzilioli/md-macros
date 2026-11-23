@@ -9,13 +9,15 @@ export interface ExtractorResults<T> {
 	items: T[];
 }
 type Extractor<T> = (index: number, event: WalkerEvent) => ExtractorResults<T>;
-export type CodeBlockExtractor = Extractor<ParsedCodeBlock>;
+/** A code block before its lines are known (the parser adds them from commonmark's source positions). */
+export type UnplacedCodeBlock = Omit<ParsedCodeBlock, 'line' | 'endLine'>;
+export type CodeBlockExtractor = Extractor<UnplacedCodeBlock>;
 
 export function getCodeBlockExtractor(): CodeBlockExtractor {
 	let areWeInCodeBlock: boolean = false;
-	return (index: number, event: WalkerEvent): ExtractorResults<ParsedCodeBlock> => {
+	return (index: number, event: WalkerEvent): ExtractorResults<UnplacedCodeBlock> => {
 		const node: commonmark.Node = event.node;
-		const codeBlocks: ParsedCodeBlock[] = [];
+		const codeBlocks: UnplacedCodeBlock[] = [];
 		if (node.type === 'code_block' || node.type === 'code') {
 			areWeInCodeBlock = event.entering;
 		} else {

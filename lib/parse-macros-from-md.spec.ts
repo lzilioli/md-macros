@@ -1,7 +1,50 @@
 import { parseMacrosFromMd } from "@lib/parse-macros-from-md";
 import assert from "assert";
-import { ParsedBlock, ParsedCodeBlock, ParsedMacros, ParsedTag } from "./entries";
+import { ParsedBlock, ParsedCodeBlock, ParsedImage, ParsedLink, ParsedListItem, ParsedMacros, ParsedTag, WikiLink } from "./entries";
 import { EMPTY_PARSE_RESULTS } from '@lib/EMPTY_PARSE_RESULTS';
+
+// Most tests below predate positions and list items: they compare results
+// without `index` / `line` on links, images and wiki links, without `line` on
+// tags, without `line` / `endLine` on code blocks, and without `lists`. The
+// 'list items' and 'line numbers' tests at the end cover those.
+type Unplaced<T> = Omit<T, 'index' | 'line'>;
+interface UnplacedMacros extends Omit<ParsedMacros, 'img' | 'links' | 'wikiLinks' | 'tags' | 'lists' | 'codeBlocks'> {
+	codeBlocks: Omit<ParsedCodeBlock, 'line' | 'endLine'>[];
+	img: Unplaced<ParsedImage>[];
+	links: Unplaced<ParsedLink>[];
+	wikiLinks: Unplaced<WikiLink>[];
+	tags: Omit<ParsedTag, 'line'>[];
+	lists?: ParsedListItem[];
+}
+
+function unplaced<T extends object>(item: T): Unplaced<T> {
+	const copy: Record<string, unknown> = { ...(item as Record<string, unknown>) };
+	delete copy.index;
+	delete copy.line;
+	return copy as Unplaced<T>;
+}
+
+function comparable(macros: ParsedMacros | UnplacedMacros): UnplacedMacros {
+	const rest: Record<string, unknown> = { ...macros };
+	delete rest.lists;
+	return {
+		...(rest as unknown as Omit<UnplacedMacros, 'img' | 'links' | 'wikiLinks' | 'tags' | 'codeBlocks'>),
+		codeBlocks: (macros.codeBlocks as ParsedCodeBlock[]).map((block: ParsedCodeBlock): Omit<ParsedCodeBlock, 'line' | 'endLine'> => {
+			const copy: Record<string, unknown> = { ...block };
+			delete copy.line;
+			delete copy.endLine;
+			return copy as Omit<ParsedCodeBlock, 'line' | 'endLine'>;
+		}),
+		img: (macros.img as ParsedImage[]).map((item: ParsedImage): Unplaced<ParsedImage> => unplaced(item)),
+		links: (macros.links as ParsedLink[]).map((item: ParsedLink): Unplaced<ParsedLink> => unplaced(item)),
+		wikiLinks: (macros.wikiLinks as WikiLink[]).map((item: WikiLink): Unplaced<WikiLink> => unplaced(item)),
+		tags: macros.tags.map((tag: Omit<ParsedTag, 'line'>): Omit<ParsedTag, 'line'> => {
+			const copy: Record<string, unknown> = { ...tag };
+			delete copy.line;
+			return copy as Omit<ParsedTag, 'line'>;
+		}),
+	};
+}
 
 export async function test(): Promise<void> {
 	describe( 'parseMacrosFromMd', () => {
@@ -79,7 +122,7 @@ test string ${macro0Text}
 test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				img: [{
 					isReferenceStyle: false,
@@ -95,7 +138,7 @@ test string ${macro1Text}
 					fullMatch: macro1Text
 				}],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('captures image macros with no alt and title', () => {
@@ -106,7 +149,7 @@ test string ${macro0Text}
 test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				img: [{
 					isReferenceStyle: false,
@@ -122,7 +165,7 @@ test string ${macro1Text}
 					fullMatch: macro1Text
 				}],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('captures both types of macros together', () => {
@@ -135,7 +178,7 @@ test string ${macro0Text}
 test string ${macro1Text}
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					name: 'youtube',
@@ -150,7 +193,7 @@ test string ${macro1Text}
 					fullMatch: macro0Text
 				}],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('sets task parent to null when no header precedes it', () => {
@@ -162,7 +205,7 @@ test string ${macro1Text}
 Thank you for attending my talk.
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				headers: [],
 				tasks: [{
@@ -191,7 +234,7 @@ Thank you for attending my talk.
 					},
 				}]
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('does not complain about TODO checkboxes, and parses them out', () => {
@@ -203,7 +246,7 @@ Thank you for attending my talk.
 Thank you for attending my talk.
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				headers: [{
 					text: 'This is a document',
@@ -245,7 +288,7 @@ Thank you for attending my talk.
 					},
 				}]
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('parses out tags and captures their proper intent level', () => {
@@ -264,7 +307,7 @@ Thank you for attending my talk.
 Thank you for attending my talk.
 			`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				headers: [{
 					text: 'This is a document',
@@ -436,7 +479,7 @@ Thank you for attending my talk.
 					},
 				}]
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('captures references', () => {
@@ -445,7 +488,7 @@ Thank you for attending my talk.
 [link text itself]: http://www.reddit.com
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				references: {
 					'arbitrary case-insensitive reference text': {
@@ -470,7 +513,7 @@ Thank you for attending my talk.
 					}
 				},
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('captures links', () => {
@@ -489,7 +532,7 @@ Thank you for attending my talk.
 [oh and this]: www.example5.com
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					args: {
@@ -588,7 +631,7 @@ Thank you for attending my talk.
 					title: "oh and this",
 				}],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('skips over reference-style links within code snippets', () => {
@@ -615,7 +658,7 @@ if (!_.isArray(results)) {
 				// Check that all of the code block ranges are correct
 				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
 			});
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				codeBlocks: [{
 					index: 1,
@@ -648,13 +691,13 @@ if (!_.isArray(results)) {
 					type: 'block',
 				}],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('properly parses back-to-back code blocks', () => {
 			const md: string = '\n`some-code``some-more-code`';
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				codeBlocks: [{
 					content: '`some-code`',
@@ -672,7 +715,7 @@ if (!_.isArray(results)) {
 				// Check that all of the ranges are correct
 				assert.strictEqual(codeBlock.content, md.substr(codeBlock.index, codeBlock.length));
 			});
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('parses tags from macros', () => {
@@ -702,7 +745,7 @@ These should get excluded:
 Hello this is the #3 rule. Exclude numbers. Jumpman #23, but allow stuff like #1stunna
 but not #1: test but #what. is cool but should remove the period.`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				custom: [{
 					args: {
@@ -783,13 +826,13 @@ but not #1: test but #what. is cool but should remove the period.`;
 					length: 6,
 				}]
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		it('parses a sole tag from a string', () => {
 			const md: string = `#what`;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				tags: [{
 					tag: "#what",
@@ -798,7 +841,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 					length: 5,
 				}]
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 		});
 
 		// Helper: the tag texts parsed out of a string.
@@ -840,7 +883,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 > }
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				headers: [{
 					content: '# Hello',
@@ -863,7 +906,7 @@ but not #1: test but #what. is cool but should remove the period.`;
 					}
 				],
 			};
-			assert.deepEqual(macros, expected);
+			assert.deepEqual(comparable(macros), comparable(expected));
 			macros.quotes.forEach((codeBlock: ParsedCodeBlock): void => {
 				// Check that all of the code block ranges are correct
 				assert.strictEqual(
@@ -884,10 +927,10 @@ but not #1: test but #what. is cool but should remove the period.`;
 \`\`\`
 `;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 			};
-			assert.deepEqual(macros.tags, expected.tags);
+			assert.deepEqual(comparable(macros).tags, expected.tags);
 		});
 
 		it('BUG FIX: code blocks dont throw off tags', () => {
@@ -902,7 +945,7 @@ tags:
 
 1. \`CODE_BLOCK\` ____ \`ANOTHER_ONE\``;
 			const macros: ParsedMacros = parseMacrosFromMd(md);
-			const expected: ParsedMacros = {
+			const expected: UnplacedMacros = {
 				...EMPTY_PARSE_RESULTS,
 				tags: [{
 					tag: '#privacy',
@@ -911,7 +954,7 @@ tags:
 					length: 8
 				}]
 			};
-			assert.deepEqual(macros.tags, expected.tags);
+			assert.deepEqual(comparable(macros).tags, expected.tags);
 		});
 	} );
 
@@ -920,10 +963,10 @@ tags:
 
 I am providing a phone #: xxx-yyy-zzz`;
 		const macros: ParsedMacros = parseMacrosFromMd(md);
-		const expected: ParsedMacros = {
+		const expected: UnplacedMacros = {
 			...EMPTY_PARSE_RESULTS,
 		};
-		assert.deepEqual(macros.tags, expected.tags);
+		assert.deepEqual(comparable(macros).tags, expected.tags);
 	});
 
 	it('extracts block quotes', () => {
@@ -949,7 +992,7 @@ Ahh. Thats right.
 			// Check that all of the code block ranges are correct
 			assert.strictEqual(block.content, md.substr(block.index, block.length));
 		});
-		const expected: ParsedMacros = {
+		const expected: UnplacedMacros = {
 			...EMPTY_PARSE_RESULTS,
 			quotes: [{
 				content: '> This is what you said.\n' +
@@ -964,7 +1007,7 @@ Ahh. Thats right.
 			}],
 		};
 		assert.deepEqual(macros.quotes, expected.quotes);
-		assert.deepEqual(macros.tags, expected.tags);
+		assert.deepEqual(comparable(macros).tags, expected.tags);
 	});
 
 	it('doesnt throw on this list', () => {
@@ -983,7 +1026,7 @@ Ahh. Thats right.
 			// Check that all of the code block ranges are correct
 			assert.strictEqual(block.content, md.substr(block.index, block.length));
 		});
-		const expected: ParsedMacros = {
+		const expected: UnplacedMacros = {
 			...EMPTY_PARSE_RESULTS,
 			codeBlocks: [{
 				content: "`{ foo: foo }`",
@@ -1017,7 +1060,7 @@ Ahh. Thats right.
 				type: "inline",
 			}],
 		};
-		assert.deepEqual(macros, expected);
+		assert.deepEqual(comparable(macros), comparable(expected));
 	});
 
 	it('does not parse out wiki-style links as macros', () => {
@@ -1027,7 +1070,7 @@ Ahh. Thats right.
 [[this is a wiki link#toasection|This one links to a section]]
 `;
 		const macros: ParsedMacros = parseMacrosFromMd(md);
-		const expected: ParsedMacros = {
+		const expected: UnplacedMacros = {
 			...EMPTY_PARSE_RESULTS,
 			wikiLinks: [
 				{
@@ -1064,12 +1107,12 @@ Ahh. Thats right.
 				}
 			],
 		};
-		assert.deepEqual(macros, expected);
+		assert.deepEqual(comparable(macros), comparable(expected));
 	});
 
 	it('parses a same-note header link ([[#header]]) with an empty target', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`See [[#Punchlines]] below.\n`);
-		assert.deepEqual(macros.wikiLinks, [{
+		assert.deepEqual(comparable(macros).wikiLinks, [{
 			targetName: '',
 			header: 'Punchlines',
 			blockId: '',
@@ -1081,7 +1124,7 @@ Ahh. Thats right.
 
 	it('parses a same-note header link with an explicit alias', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`Jump [[#Punchlines|to the jokes]].\n`);
-		assert.deepEqual(macros.wikiLinks, [{
+		assert.deepEqual(comparable(macros).wikiLinks, [{
 			targetName: '',
 			header: 'Punchlines',
 			blockId: '',
@@ -1093,7 +1136,7 @@ Ahh. Thats right.
 
 	it('parses a block reference ([[Target#^blockId]]) into blockId, not header', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`Ref [[My Note#^abc123]].\n`);
-		assert.deepEqual(macros.wikiLinks, [{
+		assert.deepEqual(comparable(macros).wikiLinks, [{
 			targetName: 'My Note',
 			header: '',
 			blockId: 'abc123',
@@ -1105,7 +1148,7 @@ Ahh. Thats right.
 
 	it('parses a block reference with an alias', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`[[My Note#^abc123|see this bit]]\n`);
-		assert.deepEqual(macros.wikiLinks, [{
+		assert.deepEqual(comparable(macros).wikiLinks, [{
 			targetName: 'My Note',
 			header: '',
 			blockId: 'abc123',
@@ -1117,7 +1160,7 @@ Ahh. Thats right.
 
 	it('parses an embed/transclusion (![[Target]]) with isEmbed true', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`![[Some Note]]\n[[diagram.png]]\n`);
-		assert.deepEqual(macros.wikiLinks, [
+		assert.deepEqual(comparable(macros).wikiLinks, [
 			{
 				targetName: 'Some Note',
 				header: '',
@@ -1147,7 +1190,7 @@ Ahh. Thats right.
 		assert.equal(macros.links[0].href, 'http://example.com');
 		assert.equal(macros.links[0].title, 'some title');
 		// The wiki link after the malformed link still parses (parse not aborted).
-		assert.deepEqual(macros.wikiLinks, [{
+		assert.deepEqual(comparable(macros).wikiLinks, [{
 			targetName: 'Survivor',
 			header: '',
 			blockId: '',
@@ -1200,7 +1243,7 @@ Ahh. Thats right.
 
 	it('strips the Obsidian \\| pipe-escape from target and header', () => {
 		const macros: ParsedMacros = parseMacrosFromMd(`[[Categories/_Index\\|Categories]] and [[Note#Section\\|Sec]]\n`);
-		assert.deepEqual(macros.wikiLinks, [
+		assert.deepEqual(comparable(macros).wikiLinks, [
 			{
 				targetName: 'Categories/_Index',
 				header: '',
@@ -1218,5 +1261,74 @@ Ahh. Thats right.
 				fullMatch: '[[Note#Section\\|Sec]]',
 			},
 		]);
+	});
+
+	describe('list items', () => {
+		it('records every item, task or not, with lines, parents and the list it belongs to', () => {
+			const md: string = [
+				'Intro',
+				'',
+				'- first',
+				'  continued',
+				'  - [x] nested task ^done-1',
+				'    - [ ] deeper',
+				'- [-] cancelled',
+				'',
+				'1. one',
+				'2. two',
+			].join('\n');
+			const lists: ParsedListItem[] = parseMacrosFromMd(md).lists;
+			assert.deepEqual(lists.map((item: ParsedListItem) => [item.line, item.endLine, item.column, item.marker, item.task, item.parentLine, item.listLine, item.listEndLine, item.blockId]), [
+				[2, 3, 0, '-', null, null, 2, 6, ''],
+				[4, 4, 2, '-', 'x', 2, 2, 6, 'done-1'],
+				[5, 5, 4, '-', ' ', 4, 2, 6, ''],
+				[6, 6, 0, '-', '-', null, 2, 6, ''],
+				[8, 8, 0, '1.', null, null, 8, 9, ''],
+				[9, 9, 0, '2.', null, null, 8, 9, ''],
+			]);
+			assert.equal(lists[0].content, '- first\n  continued');
+			assert.equal(lists[1].content, '- [x] nested task ^done-1');
+			assert.equal(md.slice(lists[1].index, lists[1].index + lists[1].length), lists[1].content);
+		});
+
+		it('handles tab indentation, other markers and lists inside block quotes', () => {
+			const md: string = '* a\n\t+ b\n\n> - quoted\n';
+			const lists: ParsedListItem[] = parseMacrosFromMd(md).lists;
+			assert.deepEqual(lists.map((item: ParsedListItem) => [item.line, item.column, item.marker, item.parentLine, item.listLine]), [
+				[0, 0, '*', null, 0],
+				[1, 1, '+', 0, 0],
+				[3, 2, '-', null, 3],
+			]);
+		});
+
+		it('ignores list markers inside code blocks', () => {
+			const md: string = '```\n- not a list\n```\n- real\n';
+			assert.deepEqual(parseMacrosFromMd(md).lists.map((item: ParsedListItem) => item.line), [3]);
+		});
+
+		it('is empty when there are no lists', () => {
+			assert.deepEqual(parseMacrosFromMd('just text').lists, []);
+		});
+	});
+
+	describe('line numbers', () => {
+		it('records where links, images, wiki links and tags are', () => {
+			const md: string = 'top #first\n\n[a](b.md) and [[Note]]\n![img](pic.png) ![[Embed]] #second\n';
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			assert.deepEqual(macros.links.map((l: ParsedLink) => [l.line, l.index]), [[2, 12]]);
+			assert.deepEqual(macros.img.map((i: ParsedImage) => [i.line, i.index]), [[3, 35]]);
+			assert.deepEqual(macros.wikiLinks.map((w: WikiLink) => [w.fullMatch, w.line, w.index]), [['[[Note]]', 2, 26], ['![[Embed]]', 3, 51]]);
+			assert.deepEqual(macros.tags.map((t: ParsedTag) => [t.tag, t.line]), [['#first', 0], ['#second', 3]]);
+		});
+
+		it('records the lines of code blocks', () => {
+			const md: string = 'text `inline`\n\n~~~js\none\ntwo\n~~~\n\n    indented\n    code\n\nafter\n';
+			const macros: ParsedMacros = parseMacrosFromMd(md);
+			assert.deepEqual(macros.codeBlocks.map((c: ParsedCodeBlock) => [c.type, c.line, c.endLine]), [
+				['inline', 0, 0],
+				['block', 2, 5],
+				['block', 7, 8],
+			]);
+		});
 	});
 }
